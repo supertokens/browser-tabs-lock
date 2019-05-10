@@ -1,8 +1,9 @@
 /** 
- * @version 1.0.2
+ * @version 1.0.3
  * @module browser-tabs-lock
  * @copyright VRAI Labs Pvt. Ltd. 2019
  * @author Bhumil Sarvaiya <bhumilsarvaiya@gmail.com>
+ * @author Rishabh Poddar <rishabhpoddar@gmail.com>
  * @license ISC
 */
 
