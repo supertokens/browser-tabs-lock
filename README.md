@@ -43,4 +43,4 @@ acquireLock("hello", 5000).then((success) => {
 ```
 
 
-Also note, that if your web app only needs to work on google chrome, you can use the [Web Locks API](https://developer.mozilla.org/en-US/docs/Web/API/bash Lock) instead. This probably has true locking!
+Also note, that if your web app only needs to work on google chrome, you can use the [Web Locks API](https://developer.mozilla.org/en-US/docs/Web/API/Lock) instead. This probably has true locking!
