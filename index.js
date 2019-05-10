@@ -1,5 +1,5 @@
 /** 
- * @version 1.0.4
+ * @version 1.0.5
  * @module browser-tabs-lock
  * @copyright VRAI Labs Pvt. Ltd. 2019
  * @author Bhumil Sarvaiya <bhumilsarvaiya@gmail.com>
@@ -70,7 +70,6 @@ class TabsLock {
      * @description Generates an id which will be unique for the browser tab
      */
     static getTabId () {
-        this.lockCorrector();
         return  Date.now().toString() + generateRandomString()
     }
     
@@ -112,6 +111,7 @@ class TabsLock {
                     }
                 }
             } else {
+                this.lockCorrector();
                 await delay(30);
             }
             currentTime = Date.now();
@@ -139,9 +139,11 @@ class TabsLock {
         }
         lockObj = JSON.parse(lockObj);
         if (lockObj.tabId === tabId && (iat === null || lockObj.iat === iat)) {
-            const timeoutKey = `${tabId}-${lockKey}-${iat}`;
             storage.removeItem(storageKey);
-            clearTimeout(window[timeoutKey]);
+            if (iat !== null) {
+                const timeoutKey = `${tabId}-${lockKey}-${iat}`;
+                clearTimeout(window[timeoutKey]);
+            }
         }
     }
 
@@ -154,24 +156,21 @@ class TabsLock {
      *              released, this function will release those locks
      */
     static lockCorrector () {
-        setTimeout(() => {
-            const minAllowedTime = Date.now() - 10000;
-            const storage = window.localStorage;
-            const keys = Object.keys(storage);
-            for (let i = 0; i < keys.length; i++) {
-                const lockKey = keys[i];
-                if (lockKey.includes(locksStorageKey)) {
-                    let lockObj = storage.getItem(lockKey);
-                    if (lockObj !== null) {
-                        lockObj = JSON.parse(lockObj);
-                        if (lockObj.iat < minAllowedTime) {
-                            storage.removeItem(lockKey);
-                        }
+        const minAllowedTime = Date.now() - 10000;
+        const storage = window.localStorage;
+        const keys = Object.keys(storage);
+        for (let i = 0; i < keys.length; i++) {
+            const lockKey = keys[i];
+            if (lockKey.includes(locksStorageKey)) {
+                let lockObj = storage.getItem(lockKey);
+                if (lockObj !== null) {
+                    lockObj = JSON.parse(lockObj);
+                    if (lockObj.iat < minAllowedTime) {
+                        storage.removeItem(lockKey);
                     }
                 }
             }
-            this.lockCorrector();
-        }, 1000);
+        }
     }
 }
 
