@@ -11,7 +11,7 @@ const LOCK_STORAGE_KEY = 'browser-tabs-lock-nijndsffs';
  * @param {number} milliseconds - How long the delay should be in terms of milliseconds
  * @returns {Promise<void>} 
  */
-const delay = (milliseconds) => {
+function delay(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
@@ -20,7 +20,7 @@ const delay = (milliseconds) => {
  * @returns {string}
  * @description returns random string which is 8 characters long
  */
-const generateRandomString = (length) => {
+function generateRandomString(length) {
     const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
     let randomstring = '';
     for (let i = 0; i < length; i++) {
@@ -89,8 +89,7 @@ async function acquireLock(lockKey, timeout = 5000) {
 /**
  * @function releaseLock
  * @param {string} lockKey - Key for which lock is being released
- * @param {number} [iat=null] - Time at which lock was acquired.
- *                              Will not be null only if called via setTimeout from acquireLock
+ * @param {number} [iat=null] - Will not be null only if called via setTimeout from acquireLock
  * @returns {void}
  * @description Release a lock.
  */
