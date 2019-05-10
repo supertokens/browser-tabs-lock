@@ -139,11 +139,9 @@ class TabsLock {
         }
         lockObj = JSON.parse(lockObj);
         if (lockObj.tabId === tabId && (iat === null || lockObj.iat === iat)) {
+            const timeoutKey = lockObj.timeoutKey;
             storage.removeItem(storageKey);
-            if (iat !== null) {
-                const timeoutKey = `${tabId}-${lockKey}-${iat}`;
-                clearTimeout(window[timeoutKey]);
-            }
+            clearTimeout(window[timeoutKey]);
         }
     }
 
