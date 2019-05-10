@@ -1,5 +1,5 @@
 /** 
- * @version 1.0.0
+ * @version 1.0.1
  * @module browser-tabs-lock
  * @copyright VRAI Labs Pvt. Ltd. 2019
  * @author Bhumil Sarvaiya <bhumilsarvaiya@gmail.com>
