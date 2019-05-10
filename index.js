@@ -1,5 +1,5 @@
 /** 
- * @version 1.0.1
+ * @version 1.0.2
  * @module browser-tabs-lock
  * @copyright VRAI Labs Pvt. Ltd. 2019
  * @author Bhumil Sarvaiya <bhumilsarvaiya@gmail.com>
@@ -12,7 +12,7 @@
  * @default
  * @description All the locks taken by this package will have this as prefix
 */
-const locksStorageKey = 'sync-tab-locks';
+const locksStorageKey = 'browser-tabs-lock';
 
 /** 
  * @constant
@@ -48,7 +48,7 @@ const generateRandomString = () => {
 /**
  * @class
  * @example
- * const tabId = TabsLock.getId();
+ * const tabId = TabsLock.getTabId();
  * let lockKey = 'lockKey';
  * if (await TabsLock.acquireLock(lockKey, tabId, 8000)) {
  *      // lock acquired
