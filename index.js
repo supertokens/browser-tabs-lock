@@ -17,19 +17,19 @@ function delay(milliseconds) {
 
 /**
  * @function generateRandomString
+ * @params {number} length - How long the random string should be
  * @returns {string}
- * @description returns random string which is 8 characters long
+ * @description returns random string whose length is equal to the length passed as parameter
  */
 function generateRandomString(length) {
-    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
+    const CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
     let randomstring = '';
     for (let i = 0; i < length; i++) {
-        const index = Math.floor(Math.random() * chars.length);
-        randomstring += chars[index];
+        const INDEX = Math.floor(Math.random() * CHARS.length);
+        randomstring += CHARS[INDEX];
     }
     return randomstring;
 }
-
 
 /**
  * @function getTabId
@@ -53,25 +53,25 @@ const TAB_ID = getTabId();
  */
 async function acquireLock(lockKey, timeout = 5000) {
     let iat = Date.now() + generateRandomString(4);
-    const maxTime = Date.now() + timeout;
-    const storageKey = `${LOCK_STORAGE_KEY}-${lockKey}`;
-    const storage = window.localStorage;
-    while (Date.now() < maxTime) {
-        let lockObj = storage.getItem(storageKey);
+    const MAX_TIME = Date.now() + timeout;
+    const STORAGE_KEY = `${LOCK_STORAGE_KEY}-${lockKey}`;
+    const STORAGE = window.localStorage;
+    while (Date.now() < MAX_TIME) {
+        let lockObj = STORAGE.getItem(STORAGE_KEY);
         if (lockObj === null) {
-            const timeoutKey = `${TAB_ID}-${lockKey}-${iat}`;
-            storage.setItem(storageKey, JSON.stringify({
+            const TIMEOUT_KEY = `${TAB_ID}-${lockKey}-${iat}`;
+            STORAGE.setItem(STORAGE_KEY, JSON.stringify({
                 tabId: TAB_ID,
                 iat,
-                timeoutKey,
+                timeoutKey: TIMEOUT_KEY,
                 timeAcquired: Date.now()
             }));
             await delay(50);    // this is to prevent race conditions. This time must be more than the time it takes for storage.setItem
-            let lockObjPostDelay = storage.getItem(storageKey);
+            let lockObjPostDelay = STORAGE.getItem(STORAGE_KEY);
             if (lockObjPostDelay !== null) {
                 lockObjPostDelay = JSON.parse(lockObjPostDelay);
                 if (lockObjPostDelay.tabId === TAB_ID && lockObjPostDelay.iat === iat) {
-                    window[timeoutKey] = setTimeout(() => {
+                    window[TIMEOUT_KEY] = setTimeout(() => {
                         releaseLock(lockKey, iat);
                     }, 10000);
                     return true;
@@ -94,17 +94,16 @@ async function acquireLock(lockKey, timeout = 5000) {
  * @description Release a lock.
  */
 function releaseLock(lockKey, iat = null) {
-    const storage = window.localStorage;
-    const storageKey = `${LOCK_STORAGE_KEY}-${lockKey}`;
-    let lockObj = storage.getItem(storageKey);
+    const STORAGE = window.localStorage;
+    const STORAGE_KEY = `${LOCK_STORAGE_KEY}-${lockKey}`;
+    let lockObj = STORAGE.getItem(STORAGE_KEY);
     if (lockObj === null) {
         return;
     }
     lockObj = JSON.parse(lockObj);
     if (lockObj.tabId === TAB_ID && (iat === null || lockObj.iat === iat)) {
-        const timeoutKey = lockObj.timeoutKey;
-        storage.removeItem(storageKey);
-        clearTimeout(window[timeoutKey]);
+        STORAGE.removeItem(STORAGE_KEY);
+        clearTimeout(window[lockObj.timeoutKey]);
     }
 }
 
@@ -115,17 +114,17 @@ function releaseLock(lockKey, iat = null) {
  *              released, this function will release those locks
  */
 function lockCorrector() {
-    const minAllowedTime = Date.now() - 10000;
-    const storage = window.localStorage;
-    const keys = Object.keys(storage);
-    for (let i = 0; i < keys.length; i++) {
-        const lockKey = keys[i];
-        if (lockKey.includes(LOCK_STORAGE_KEY)) {
-            let lockObj = storage.getItem(lockKey);
+    const MIN_ALLOWED_TIME = Date.now() - 10000;
+    const STORAGE = window.localStorage;
+    const KEYS = Object.KEYS(STORAGE);
+    for (let i = 0; i < KEYS.length; i++) {
+        const LOCK_KEY = KEYS[i];
+        if (LOCK_KEY.includes(LOCK_STORAGE_KEY)) {
+            let lockObj = STORAGE.getItem(LOCK_KEY);
             if (lockObj !== null) {
                 lockObj = JSON.parse(lockObj);
-                if (lockObj.timeAcquired < minAllowedTime) {
-                    storage.removeItem(lockKey);
+                if (lockObj.timeAcquired < MIN_ALLOWED_TIME) {
+                    STORAGE.removeItem(LOCK_KEY);
                 }
             }
         }
