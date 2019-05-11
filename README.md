@@ -3,7 +3,7 @@
 Using this package, you can easily get lock functionality across tabs on all modern browsers.
 
 ## Some things to note about:
-- This is not a Reentrant lock. So please do not attempt to acquire a lock on the same key within the same tab if you are already currently holding that lock.
+- This is not a reentrant lock. So please do not attempt to acquire a lock on the same key within the same tab if you are already currently holding that lock.
 - Theoretically speaking, it is impossible to have foolproof locking built on top of javascript in the browser. One can only make it so that in all practical scenarios, it emulates locking.
 
 ## Installation:
