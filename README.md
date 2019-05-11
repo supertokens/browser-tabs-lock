@@ -13,15 +13,16 @@ npm i --save browser-tabs-lock
 
 ### Usage in an async function:
 ```js
-import {acquireLock, releaseLock} from "browser-tabs-lock";
+import Lock from "browser-tabs-lock";
 
+let lock = new Lock()
 async function lockingIsFun() {
-	if (await acquireLock("hello", 5000)) {
+	if (await lock.acquireLock("hello", 5000)) {
 		// lock has been acquired... we can do anything we want now.
 		// ...
-		releaseLock("hello");
+		lock.releaseLock("hello");
 	} else {
-		// lock failed to acquire after trying to acquire it for 5 seconds. 
+		// failed to acquire lock after trying for 5 seconds. 
 	}
 }
 ```
@@ -29,15 +30,16 @@ async function lockingIsFun() {
 ### Usage using callbacks:
 
 ```js
-import {acquireLock, releaseLock} from "browser-tabs-lock";
+import Lock from "browser-tabs-lock";
 
-acquireLock("hello", 5000).then((success) => {
+let lock = new Lock()
+lock.acquireLock("hello", 5000).then((success) => {
 	if (success) {
-		// lock has bee acquired... we can do anything we want now.
+		// lock has been acquired... we can do anything we want now.
 		// ...
-		releaseLock("hello");
+		lock.releaseLock("hello");
 	} else {
-		// lock failed to acquire after trying to acquire it for 5 seconds. 
+		// failed to acquire lock after trying for 5 seconds. 
 	}
 });
 ```
