@@ -44,6 +44,9 @@ class Lock {
 
     constructor() {
         this.id = getLockId();
+        this.acquireLock = this.acquireLock.bind(this);
+        this.releaseLock = this.releaseLock.bind(this);
+        this.releaseLock__private__ = this.releaseLock__private__.bind(this);
     }
 
     /**
@@ -56,7 +59,7 @@ class Lock {
      * @description Will return true if lock is being acuired, else false.
      *              Also the lock can be acquired for maximum 10 secs
      */
-    acquireLock = async (lockKey, timeout = 5000) => {
+    async acquireLock(lockKey, timeout = 5000) {
         let iat = Date.now() + generateRandomString(4);
         const MAX_TIME = Date.now() + timeout;
         const STORAGE_KEY = `${LOCK_STORAGE_KEY}-${lockKey}`;
@@ -84,7 +87,7 @@ class Lock {
                 }
             } else {
                 lockCorrector();
-                await delay(30);
+                await delay(50);
             }
             iat = Date.now() + generateRandomString(4);
         }
@@ -98,7 +101,7 @@ class Lock {
      * @returns {void}
      * @description Release a lock.
      */
-    releaseLock = (lockKey) => {
+    releaseLock(lockKey) {
         return this.releaseLock__private__(lockKey);
     }
 
@@ -110,7 +113,7 @@ class Lock {
      * @returns {void}
      * @description Release a lock.
      */
-    releaseLock__private__ = (lockKey, iat = null) => {
+    releaseLock__private__(lockKey, iat = null) {
         const STORAGE = window.localStorage;
         const STORAGE_KEY = `${LOCK_STORAGE_KEY}-${lockKey}`;
         let lockObj = STORAGE.getItem(STORAGE_KEY);
@@ -134,7 +137,7 @@ class Lock {
 function lockCorrector() {
     const MIN_ALLOWED_TIME = Date.now() - 10000;
     const STORAGE = window.localStorage;
-    const KEYS = Object.KEYS(STORAGE);
+    const KEYS = Object.keys(STORAGE);
     for (let i = 0; i < KEYS.length; i++) {
         const LOCK_KEY = KEYS[i];
         if (LOCK_KEY.includes(LOCK_STORAGE_KEY)) {
