@@ -4,7 +4,7 @@
  * @default
  * @description All the locks taken by this package will have this as prefix
 */
-const LOCK_STORAGE_KEY = 'browser-tabs-lock-nijndsffs';
+const LOCK_STORAGE_KEY = 'browser-tabs-lock-key';
 
 /**
  * @function delay
@@ -100,34 +100,27 @@ class Lock {
         await new Promise(resolve => {
             let resolvedCalled = false;
             let startedAt = Date.now();
-            const MIN_TIME_TO_WAIT = 30;    // ms
+            const MIN_TIME_TO_WAIT = 50;    // ms
+            let removedListeners = false;
             function stopWaiting() {
-                if (!resolvedCalled) {
-                    window.removeEventListener('storage', localStorageChanged);
-                    Lock.removeFromWaiting(thisTabLockChanged);
+                if (!removedListeners) {
+                    window.removeEventListener('storage', stopWaiting);
+                    Lock.removeFromWaiting(stopWaiting);
                     clearTimeout(timeOutId);
+                    removedListeners = true;
+                }
+                if (!resolvedCalled) {
                     resolvedCalled = true;
-                    resolve();
+                    let timeToWait = MIN_TIME_TO_WAIT - (Date.now() - startedAt);
+                    if (timeToWait > 0) {
+                        setTimeout(resolve, timeToWait);
+                    } else {
+                        resolve();
+                    }
                 }
             }
-            function localStorageChanged() {    // this is there for any lock changes in other tabs
-                let timeToWait = MIN_TIME_TO_WAIT - (Date.now() - startedAt);
-                if (timeToWait > 0) {
-                    setTimeout(stopWaiting, timeToWait);
-                } else {
-                    stopWaiting();
-                }
-            }
-            function thisTabLockChanged() { // this is there for any lock changes in this tab
-                let timeToWait = MIN_TIME_TO_WAIT - (Date.now() - startedAt);
-                if (timeToWait > 0) {
-                    setTimeout(stopWaiting, timeToWait);
-                } else {
-                    stopWaiting();
-                }
-            }
-            window.addEventListener('storage', localStorageChanged);
-            Lock.addToWaiting(thisTabLockChanged);
+            window.addEventListener('storage', stopWaiting);
+            Lock.addToWaiting(stopWaiting);
             let timeOutId = setTimeout(stopWaiting, Math.max(0, MAX_TIME - Date.now()));
         });
     }
