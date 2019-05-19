@@ -42,13 +42,15 @@ function getLockId() {
 
 class Lock {
 
-    static waiters = [];
-
     constructor() {
         this.id = getLockId();
         this.acquireLock = this.acquireLock.bind(this);
         this.releaseLock = this.releaseLock.bind(this);
         this.releaseLock__private__ = this.releaseLock__private__.bind(this);
+        this.waitForSomethingToChange = this.waitForSomethingToChange.bind(this);
+        if (Lock.waiters === undefined) {
+            Lock.waiters = [];
+        }
     }
 
     /**
@@ -96,7 +98,7 @@ class Lock {
         return false;
     }
 
-    waitForSomethingToChange = async (MAX_TIME) => {
+    async waitForSomethingToChange(MAX_TIME) {
         await new Promise(resolve => {
             let resolvedCalled = false;
             let startedAt = Date.now();
@@ -125,16 +127,16 @@ class Lock {
         });
     }
 
-    static addToWaiting = (func) => {
+    static addToWaiting(func) {
         this.removeFromWaiting(func);
         Lock.waiters.push(func);
     }
 
-    static removeFromWaiting = (func) => {
+    static removeFromWaiting(func) {
         Lock.waiters = Lock.waiters.filter(i => i !== func);
     }
 
-    static notifyWaiters = () => {
+    static notifyWaiters() {
         let waiters = [...Lock.waiters];    // so that if Lock.waiters is changed it's ok.
         waiters.forEach(i => i());
     }
