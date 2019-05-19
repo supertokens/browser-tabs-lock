@@ -72,20 +72,19 @@ class Lock {
             let lockObj = STORAGE.getItem(STORAGE_KEY);
             if (lockObj === null) {
                 const TIMEOUT_KEY = `${this.id}-${lockKey}-${iat}`;
+                // there is a problem if setItem happens at the exact same time for 2 different processes.. so we add some random delay here.
+                await delay(Math.floor(Math.random() * 25));
                 STORAGE.setItem(STORAGE_KEY, JSON.stringify({
                     id: this.id,
                     iat,
                     timeoutKey: TIMEOUT_KEY,
                     timeAcquired: Date.now()
                 }));
-                await delay(50);    // this is to prevent race conditions. This time must be more than the time it takes for storage.setItem
+                await delay(30);    // this is to prevent race conditions. This time must be more than the time it takes for storage.setItem
                 let lockObjPostDelay = STORAGE.getItem(STORAGE_KEY);
                 if (lockObjPostDelay !== null) {
                     lockObjPostDelay = JSON.parse(lockObjPostDelay);
                     if (lockObjPostDelay.id === this.id && lockObjPostDelay.iat === iat) {
-                        window[TIMEOUT_KEY] = setTimeout(() => {
-                            this.releaseLock__private__(lockKey, iat);
-                        }, 10000);
                         return true;
                     }
                 }
@@ -170,7 +169,6 @@ class Lock {
         lockObj = JSON.parse(lockObj);
         if (lockObj.id === this.id && (iat === null || lockObj.iat === iat)) {
             STORAGE.removeItem(STORAGE_KEY);
-            clearTimeout(window[lockObj.timeoutKey]);
             Lock.notifyWaiters();
         }
     }
