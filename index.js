@@ -89,14 +89,14 @@ class Lock {
                 }
             } else {
                 lockCorrector();
-                await waitForSomethingToChange();
+                await this.waitForSomethingToChange(MAX_TIME);
             }
             iat = Date.now() + generateRandomString(4);
         }
         return false;
     }
 
-    waitForSomethingToChange = async () => {
+    waitForSomethingToChange = async (MAX_TIME) => {
         await new Promise(resolve => {
             let resolvedCalled = false;
             let startedAt = Date.now();
@@ -138,9 +138,7 @@ class Lock {
     }
 
     static removeFromWaiting = (func) => {
-        Lock.waiters = Lock.waiters.filter((i) => {
-            return i !== func
-        });
+        Lock.waiters = Lock.waiters.filter(i => i !== func);
     }
 
     static notifyWaiters = () => {
