@@ -42,6 +42,8 @@ function getLockId() {
 
 class Lock {
 
+    static waiters = [];
+
     constructor() {
         this.id = getLockId();
         this.acquireLock = this.acquireLock.bind(this);
@@ -87,11 +89,63 @@ class Lock {
                 }
             } else {
                 lockCorrector();
-                await delay(50);
+                await waitForSomethingToChange();
             }
             iat = Date.now() + generateRandomString(4);
         }
         return false;
+    }
+
+    waitForSomethingToChange = async () => {
+        await new Promise(resolve => {
+            let resolvedCalled = false;
+            let startedAt = Date.now();
+            const MIN_TIME_TO_WAIT = 30;    // ms
+            function stopWaiting() {
+                if (!resolvedCalled) {
+                    window.removeEventListener('storage', localStorageChanged);
+                    Lock.removeFromWaiting(thisTabLockChanged);
+                    clearTimeout(timeOutId);
+                    resolvedCalled = true;
+                    resolve();
+                }
+            }
+            function localStorageChanged() {    // this is there for any lock changes in other tabs
+                let timeToWait = MIN_TIME_TO_WAIT - (Date.now() - startedAt);
+                if (timeToWait > 0) {
+                    setTimeout(stopWaiting, timeToWait);
+                } else {
+                    stopWaiting();
+                }
+            }
+            function thisTabLockChanged() { // this is there for any lock changes in this tab
+                let timeToWait = MIN_TIME_TO_WAIT - (Date.now() - startedAt);
+                if (timeToWait > 0) {
+                    setTimeout(stopWaiting, timeToWait);
+                } else {
+                    stopWaiting();
+                }
+            }
+            window.addEventListener('storage', localStorageChanged);
+            Lock.addToWaiting(thisTabLockChanged);
+            let timeOutId = setTimeout(stopWaiting, Math.max(0, MAX_TIME - Date.now()));
+        });
+    }
+
+    static addToWaiting = (func) => {
+        this.removeFromWaiting(func);
+        Lock.waiters.push(func);
+    }
+
+    static removeFromWaiting = (func) => {
+        Lock.waiters = Lock.waiters.filter((i) => {
+            return i !== func
+        });
+    }
+
+    static notifyWaiters = () => {
+        let waiters = [...Lock.waiters];    // so that if Lock.waiters is changed it's ok.
+        waiters.forEach(i => i());
     }
 
     /**
@@ -124,6 +178,7 @@ class Lock {
         if (lockObj.id === this.id && (iat === null || lockObj.iat === iat)) {
             STORAGE.removeItem(STORAGE_KEY);
             clearTimeout(window[lockObj.timeoutKey]);
+            Lock.notifyWaiters();
         }
     }
 }
@@ -138,6 +193,7 @@ function lockCorrector() {
     const MIN_ALLOWED_TIME = Date.now() - 10000;
     const STORAGE = window.localStorage;
     const KEYS = Object.keys(STORAGE);
+    let notifyWaiters = false;
     for (let i = 0; i < KEYS.length; i++) {
         const LOCK_KEY = KEYS[i];
         if (LOCK_KEY.includes(LOCK_STORAGE_KEY)) {
@@ -146,9 +202,13 @@ function lockCorrector() {
                 lockObj = JSON.parse(lockObj);
                 if (lockObj.timeAcquired < MIN_ALLOWED_TIME) {
                     STORAGE.removeItem(LOCK_KEY);
+                    notifyWaiters = true;
                 }
             }
         }
+    }
+    if (notifyWaiters) {
+        Lock.notifyWaiters();
     }
 }
 
