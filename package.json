@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vrai-labs/browser-tabs-lock.git"
+    "url": "git+https://github.com/supertokens/browser-tabs-lock.git"
   },
   "keywords": [
     "browser",
@@ -29,7 +29,7 @@
   ],
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/vrai-labs/browser-tabs-lock/issues"
+    "url": "https://github.com/supertokens/browser-tabs-lock/issues"
   },
-  "homepage": "https://github.com/vrai-labs/browser-tabs-lock#readme"
+  "homepage": "https://github.com/supertokens/browser-tabs-lock#readme"
 }
