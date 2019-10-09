@@ -1,6 +1,6 @@
 {
   "name": "browser-tabs-lock",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "provides locking mechanism to sync across browser tabs",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/supertokens/browser-tabs-lock.git"
+  },
+  "devDependencies": {
+    "typescript": "3.5.2"
   },
   "keywords": [
     "browser",
@@ -25,7 +28,8 @@
   ],
   "contributors": [
     "bhumilsarvaiya",
-    "rishabhpoddar"
+    "rishabhpoddar",
+    "nkshah2"
   ],
   "license": "MIT",
   "bugs": {
