@@ -10,6 +10,9 @@
     "type": "git",
     "url": "git+https://github.com/supertokens/browser-tabs-lock.git"
   },
+  "devDependencies": {
+    "typescript": "3.5.2"
+  },
   "keywords": [
     "browser",
     "tabs",
@@ -25,7 +28,8 @@
   ],
   "contributors": [
     "bhumilsarvaiya",
-    "rishabhpoddar"
+    "rishabhpoddar",
+    "nkshah2"
   ],
   "license": "MIT",
   "bugs": {
