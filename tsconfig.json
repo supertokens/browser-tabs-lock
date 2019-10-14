@@ -6,7 +6,7 @@
         "allowSyntheticDefaultImports": true,
         "strictNullChecks": true,
         "noImplicitThis": true,
-        "module": "es6",
+        "module": "commonJS",
         "moduleResolution": "node"
     },
     "compileOnSave": true
