@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -33,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * @constant
  * @type {string}
@@ -238,7 +240,7 @@ var Lock = /** @class */ (function () {
     Lock.waiters = undefined;
     return Lock;
 }());
-export default Lock;
+exports.default = Lock;
 /**
  * @function lockCorrector
  * @returns {void}
