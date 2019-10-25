@@ -6,6 +6,13 @@
 
 Using this package, you can easily get lock functionality across tabs on all modern browsers.
 
+**This library was originally designed to be used as a part of our project - SuperTokens - the most secure session management solution for web and mobile apps. Support us by checking it out [here](https://supertokens.io).**
+
+We are also offering free, one-to-one implementation support:
+- Schedule a short call with us on https://calendly.com/supertokens-rishabh.
+- Whatsapp us on +91-7021000012 saying “SuperTokens”.
+
+
 ## Some things to note about:
 - This is not a reentrant lock. So please do not attempt to acquire a lock on the same key within the same tab if you are already currently holding that lock.
 - Theoretically speaking, it is impossible to have foolproof locking built on top of javascript in the browser. One can only make it so that in all practical scenarios, it emulates locking.
