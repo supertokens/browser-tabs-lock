@@ -73,15 +73,15 @@ function generateRandomString(length) {
 function getLockId() {
     return Date.now().toString() + generateRandomString(15);
 }
-var Lock = /** @class */ (function () {
-    function Lock() {
+var SuperTokensLock = /** @class */ (function () {
+    function SuperTokensLock() {
         this.id = getLockId();
         this.acquireLock = this.acquireLock.bind(this);
         this.releaseLock = this.releaseLock.bind(this);
         this.releaseLock__private__ = this.releaseLock__private__.bind(this);
         this.waitForSomethingToChange = this.waitForSomethingToChange.bind(this);
-        if (Lock.waiters === undefined) {
-            Lock.waiters = [];
+        if (SuperTokensLock.waiters === undefined) {
+            SuperTokensLock.waiters = [];
         }
     }
     /**
@@ -94,7 +94,7 @@ var Lock = /** @class */ (function () {
      * @description Will return true if lock is being acquired, else false.
      *              Also the lock can be acquired for maximum 10 secs
      */
-    Lock.prototype.acquireLock = function (lockKey, timeout) {
+    SuperTokensLock.prototype.acquireLock = function (lockKey, timeout) {
         if (timeout === void 0) { timeout = 5000; }
         return __awaiter(this, void 0, void 0, function () {
             var iat, MAX_TIME, STORAGE_KEY, STORAGE, lockObj, TIMEOUT_KEY, lockObjPostDelay;
@@ -147,7 +147,7 @@ var Lock = /** @class */ (function () {
             });
         });
     };
-    Lock.prototype.waitForSomethingToChange = function (MAX_TIME) {
+    SuperTokensLock.prototype.waitForSomethingToChange = function (MAX_TIME) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -159,7 +159,7 @@ var Lock = /** @class */ (function () {
                             function stopWaiting() {
                                 if (!removedListeners) {
                                     window.removeEventListener('storage', stopWaiting);
-                                    Lock.removeFromWaiting(stopWaiting);
+                                    SuperTokensLock.removeFromWaiting(stopWaiting);
                                     clearTimeout(timeOutId);
                                     removedListeners = true;
                                 }
@@ -175,7 +175,7 @@ var Lock = /** @class */ (function () {
                                 }
                             }
                             window.addEventListener('storage', stopWaiting);
-                            Lock.addToWaiting(stopWaiting);
+                            SuperTokensLock.addToWaiting(stopWaiting);
                             var timeOutId = setTimeout(stopWaiting, Math.max(0, MAX_TIME - Date.now()));
                         })];
                     case 1:
@@ -185,24 +185,24 @@ var Lock = /** @class */ (function () {
             });
         });
     };
-    Lock.addToWaiting = function (func) {
+    SuperTokensLock.addToWaiting = function (func) {
         this.removeFromWaiting(func);
-        if (Lock.waiters === undefined) {
+        if (SuperTokensLock.waiters === undefined) {
             return;
         }
-        Lock.waiters.push(func);
+        SuperTokensLock.waiters.push(func);
     };
-    Lock.removeFromWaiting = function (func) {
-        if (Lock.waiters === undefined) {
+    SuperTokensLock.removeFromWaiting = function (func) {
+        if (SuperTokensLock.waiters === undefined) {
             return;
         }
-        Lock.waiters = Lock.waiters.filter(function (i) { return i !== func; });
+        SuperTokensLock.waiters = SuperTokensLock.waiters.filter(function (i) { return i !== func; });
     };
-    Lock.notifyWaiters = function () {
-        if (Lock.waiters === undefined) {
+    SuperTokensLock.notifyWaiters = function () {
+        if (SuperTokensLock.waiters === undefined) {
             return;
         }
-        var waiters = Lock.waiters.slice(); // so that if Lock.waiters is changed it's ok.
+        var waiters = SuperTokensLock.waiters.slice(); // so that if Lock.waiters is changed it's ok.
         waiters.forEach(function (i) { return i(); });
     };
     /**
@@ -212,7 +212,7 @@ var Lock = /** @class */ (function () {
      * @returns {void}
      * @description Release a lock.
      */
-    Lock.prototype.releaseLock = function (lockKey) {
+    SuperTokensLock.prototype.releaseLock = function (lockKey) {
         return this.releaseLock__private__(lockKey);
     };
     /**
@@ -223,7 +223,7 @@ var Lock = /** @class */ (function () {
      * @returns {void}
      * @description Release a lock.
      */
-    Lock.prototype.releaseLock__private__ = function (lockKey, iat) {
+    SuperTokensLock.prototype.releaseLock__private__ = function (lockKey, iat) {
         if (iat === void 0) { iat = null; }
         var STORAGE = window.localStorage;
         var STORAGE_KEY = LOCK_STORAGE_KEY + "-" + lockKey;
@@ -234,13 +234,13 @@ var Lock = /** @class */ (function () {
         lockObj = JSON.parse(lockObj);
         if (lockObj.id === this.id && (iat === null || lockObj.iat === iat)) {
             STORAGE.removeItem(STORAGE_KEY);
-            Lock.notifyWaiters();
+            SuperTokensLock.notifyWaiters();
         }
     };
-    Lock.waiters = undefined;
-    return Lock;
+    SuperTokensLock.waiters = undefined;
+    return SuperTokensLock;
 }());
-exports.default = Lock;
+exports.default = SuperTokensLock;
 /**
  * @function lockCorrector
  * @returns {void}
@@ -266,6 +266,6 @@ function lockCorrector() {
         }
     }
     if (notifyWaiters) {
-        Lock.notifyWaiters();
+        SuperTokensLock.notifyWaiters();
     }
 }

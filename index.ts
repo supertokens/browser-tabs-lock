@@ -44,7 +44,7 @@ function getLockId(): string {
     return Date.now().toString() + generateRandomString(15)
 }
 
-export default class Lock {
+export default class SuperTokensLock {
     static waiters: Array<any> | undefined = undefined;
     id: string;
 
@@ -54,8 +54,8 @@ export default class Lock {
         this.releaseLock = this.releaseLock.bind(this);
         this.releaseLock__private__ = this.releaseLock__private__.bind(this);
         this.waitForSomethingToChange = this.waitForSomethingToChange.bind(this);
-        if (Lock.waiters === undefined) {
-            Lock.waiters = [];
+        if (SuperTokensLock.waiters === undefined) {
+            SuperTokensLock.waiters = [];
         }
     }
 
@@ -112,7 +112,7 @@ export default class Lock {
             function stopWaiting() {
                 if (!removedListeners) {
                     window.removeEventListener('storage', stopWaiting);
-                    Lock.removeFromWaiting(stopWaiting);
+                    SuperTokensLock.removeFromWaiting(stopWaiting);
                     clearTimeout(timeOutId);
                     removedListeners = true;
                 }
@@ -127,31 +127,31 @@ export default class Lock {
                 }
             }
             window.addEventListener('storage', stopWaiting);
-            Lock.addToWaiting(stopWaiting);
+            SuperTokensLock.addToWaiting(stopWaiting);
             let timeOutId = setTimeout(stopWaiting, Math.max(0, MAX_TIME - Date.now()));
         });
     }
 
     static addToWaiting(func: any) {
         this.removeFromWaiting(func);
-        if (Lock.waiters === undefined) {
+        if (SuperTokensLock.waiters === undefined) {
             return;
         }
-        Lock.waiters.push(func);
+        SuperTokensLock.waiters.push(func);
     }
 
     static removeFromWaiting(func: any) {
-        if (Lock.waiters === undefined) {
+        if (SuperTokensLock.waiters === undefined) {
             return;
         }
-        Lock.waiters = Lock.waiters.filter(i => i !== func);
+        SuperTokensLock.waiters = SuperTokensLock.waiters.filter(i => i !== func);
     }
 
     static notifyWaiters() {
-        if (Lock.waiters === undefined) {
+        if (SuperTokensLock.waiters === undefined) {
             return;
         }
-        let waiters = [...Lock.waiters];    // so that if Lock.waiters is changed it's ok.
+        let waiters = [...SuperTokensLock.waiters];    // so that if Lock.waiters is changed it's ok.
         waiters.forEach(i => i());
     }
 
@@ -184,7 +184,7 @@ export default class Lock {
         lockObj = JSON.parse(lockObj);
         if (lockObj.id === this.id && (iat === null || lockObj.iat === iat)) {
             STORAGE.removeItem(STORAGE_KEY);
-            Lock.notifyWaiters();
+            SuperTokensLock.notifyWaiters();
         }
     }
 }
@@ -214,6 +214,6 @@ function lockCorrector() {
         }
     }
     if (notifyWaiters) {
-        Lock.notifyWaiters();
+        SuperTokensLock.notifyWaiters();
     }
 }
