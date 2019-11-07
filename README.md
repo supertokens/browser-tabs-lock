@@ -1,6 +1,9 @@
-![SuperTokens banner](https://raw.githubusercontent.com/supertokens/supertokens-logo/master/images/Artboard%20%E2%80%93%2027%402x.png)
+[![SuperTokens banner](https://raw.githubusercontent.com/supertokens/supertokens-logo/master/images/Artboard%20%E2%80%93%2027%402x.png)](https://supertokens.io)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://github.com/supertokens/auth-node-mysql-ref-jwt/blob/master/LICENSE)
+<a href="https://supertokens.io/discord">
+        <img src="https://img.shields.io/discord/603466164219281420.svg?logo=discord"
+            alt="chat on Discord"></a>
 
 # Browser Tabs Lock
 
@@ -62,4 +65,4 @@ Also note, that if your web app only needs to work on google chrome, you can use
 For now, we are most reachable via team@supertokens.io and via the GitHub issues feature
 
 ## Authors
-Created with :heart: by the folks at SuperTokens. We are a startup passionate about security and solving software challenges in a way that's helpful for everyone! Please feel free to give us feedback at team@supertokens.io, until our website is ready :grinning:
+Created with :heart: by the folks at [SuperTokens](https://supertokens.io). We are a startup passionate about security and solving software challenges in a way that's helpful for everyone! Please feel free to give us feedback at team@supertokens.io, until our website is ready :grinning:
