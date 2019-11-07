@@ -1,4 +1,14 @@
 "use strict";
+/**
+ * @author: SuperTokens (https://github.com/supertokens)
+ * This library was created as a part of a session management solution called SuperTokens(https://supertokens.io)
+ * You can also check out our other projects on https://github.com/supertokens
+ *
+ * To contribute to this package visit https://github.com/supertokens/browser-tabs-lock
+ * If you face any problems you can file an issue on https://github.com/supertokens/browser-tabs-lock/issues
+ *
+ * If you have any questions or if you just want to say hi visit https://supertokens.io/discord
+ */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
