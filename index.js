@@ -1,7 +1,7 @@
 "use strict";
 /**
  * @author: SuperTokens (https://github.com/supertokens)
- * This library was created as a part of a session management solution called SuperTokens(https://supertokens.io)
+ * This library was created as a part of a larger project, SuperTokens(https://supertokens.io) - the best session management solution.
  * You can also check out our other projects on https://github.com/supertokens
  *
  * To contribute to this package visit https://github.com/supertokens/browser-tabs-lock
