@@ -27,14 +27,14 @@ npm i --save browser-tabs-lock
 
 ### Usage in an async function:
 ```js
-import Lock from "browser-tabs-lock";
+import SuperTokensLock from "browser-tabs-lock";
 
-let lock = new Lock()
+let superTokensLock = new SuperTokensLock()
 async function lockingIsFun() {
-	if (await lock.acquireLock("hello", 5000)) {
+	if (await superTokensLock.acquireLock("hello", 5000)) {
 		// lock has been acquired... we can do anything we want now.
 		// ...
-		lock.releaseLock("hello");
+		superTokensLock.releaseLock("hello");
 	} else {
 		// failed to acquire lock after trying for 5 seconds. 
 	}
@@ -44,14 +44,14 @@ async function lockingIsFun() {
 ### Usage using callbacks:
 
 ```js
-import Lock from "browser-tabs-lock";
+import SuperTokensLock from "browser-tabs-lock";
 
-let lock = new Lock()
-lock.acquireLock("hello", 5000).then((success) => {
+let superTokensLock = new SuperTokensLock()
+superTokensLock.acquireLock("hello", 5000).then((success) => {
 	if (success) {
 		// lock has been acquired... we can do anything we want now.
 		// ...
-		lock.releaseLock("hello");
+		superTokensLock.releaseLock("hello");
 	} else {
 		// failed to acquire lock after trying for 5 seconds. 
 	}
