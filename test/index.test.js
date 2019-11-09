@@ -9,7 +9,9 @@ const wait = async (timeout) => new Promise((resolve) => {
 describe("Test simple locking", async function() {
     it("Test that locking works when using more than 2 tabs", async function() {
         const domain = "file://" + process.cwd() + "/test/counterTest.html";
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
         const page0 = await browser.newPage();
 
         // Reset localStorage for testing domain
@@ -90,7 +92,9 @@ describe("Test simple locking", async function() {
 
     it("Test that acquiring the same lock on multiple tabs succeeds after the first tab is closed", async function(){
         const domain = "file://" + process.cwd() + "/test/releaseOnClose.html";
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
 
         const page1 = await browser.newPage();
         await page1.goto(domain, {waitUntil: "load"});
@@ -152,7 +156,9 @@ describe("Test simple locking", async function() {
 
     it("Test that acquiring the same lock twice from the same tab fails", async function () {
         const domain = "file://" + process.cwd() + "/test/multiLockTest.html";
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
 
         const page = await browser.newPage();
         await page.goto(domain, {waitUntil: "load"});

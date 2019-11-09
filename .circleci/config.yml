@@ -2,7 +2,7 @@ version: 2
 jobs:
   publish:
     docker:
-      - image: circleci/node:8.10.0
+      - image: circleci/node:latest-browsers
     steps:
       - checkout
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
