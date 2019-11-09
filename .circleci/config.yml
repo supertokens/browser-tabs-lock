@@ -7,9 +7,23 @@ jobs:
       - checkout
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
       - run: npm publish
+  test:
+    docker:
+      - image: circleci/node:8.10.0
+    steps:
+      - checkout
+      - run: npm -i d
+      - run: npm run test
 
 workflows:
   version: 2
+  test:
+    jobs:
+      - test:
+          filters:
+            branches:
+              only:
+                - master
   tagged-build:
     jobs:
       - publish:
