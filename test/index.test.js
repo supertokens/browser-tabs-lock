@@ -1,6 +1,4 @@
 let puppeteer = require("puppeteer");
-var version = JSON.stringify(require("../package.json").version);
-version = version.replace('"', "").replace('"', "");
 
 const wait = async (timeout) => new Promise((resolve) => {
     setTimeout(resolve, timeout);
@@ -26,7 +24,7 @@ describe("Test simple locking", async function() {
         for (let i = 0; i < tabCount; i++) {
             const page = await browser.newPage();
             await page.goto(domain, { waitUntil: "load" });
-            await page.addScriptTag({path: `./bundle/bundle-${version}.js`, type: "text/javascript"});
+            await page.addScriptTag({path: `./bundle/bundle.js`, type: "text/javascript"});
             page.evaluate(() => {
                 doTask();
             });
@@ -98,7 +96,7 @@ describe("Test simple locking", async function() {
 
         const page1 = await browser.newPage();
         await page1.goto(domain, {waitUntil: "load"});
-        await page1.addScriptTag({path: `./bundle/bundle-${version}.js`, type: "text/javascript"});
+        await page1.addScriptTag({path: `./bundle/bundle.js`, type: "text/javascript"});
         await page1.evaluate(() => {
             doTask()
         })
@@ -111,7 +109,7 @@ describe("Test simple locking", async function() {
 
         let page2 = await browser.newPage();
         await page2.goto(domain, {waitUntil: "load"});
-        await page2.addScriptTag({path: `./bundle/bundle-${version}.js`, type: "text/javascript"});
+        await page2.addScriptTag({path: `./bundle/bundle.js`, type: "text/javascript"});
         await page2.evaluate(() => {
             doTask()
         })
@@ -136,7 +134,7 @@ describe("Test simple locking", async function() {
 
         page2 = await browser.newPage()
         await page2.goto(domain, {waitUntil: "load"});
-        await page2.addScriptTag({path: `./bundle/bundle-${version}.js`, type: "text/javascript"});
+        await page2.addScriptTag({path: `./bundle/bundle.js`, type: "text/javascript"});
         await page2.evaluate(() => {
             doTask()
         })
@@ -162,7 +160,7 @@ describe("Test simple locking", async function() {
 
         const page = await browser.newPage();
         await page.goto(domain, {waitUntil: "load"});
-        await page.addScriptTag({path: `./bundle/bundle-${version}.js`, type: "text/javascript"})
+        await page.addScriptTag({path: `./bundle/bundle.js`, type: "text/javascript"})
         await page.evaluate(() => {
             doTask();
         })

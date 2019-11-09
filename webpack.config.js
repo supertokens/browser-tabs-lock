@@ -9,7 +9,7 @@ var config = {
     entry: APP_DIR + "/bundleEntry.js",
     output: {
         path: BUILD_DIR + "/bundle",
-        filename: `bundle-${version.replace('"', "").replace('"', "")}.js`,
+        filename: `bundle.js`,
         library: "supertokenslock",
     }
 };
