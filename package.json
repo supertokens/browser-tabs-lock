@@ -7,7 +7,8 @@
     "pack-test": "npm run pack && npx mocha --timeout 40000 --exit",
     "pack": "rm -f ./bundle/* && ./node_modules/.bin/webpack -p",
     "build": "npx tsc -p tsconfig.json",
-    "test": "npx mocha --timeout 40000 --exit"
+    "test": "npx mocha --timeout 40000 --exit",
+    "postinstall": "node scripts/postinstall.js"
   },
   "repository": {
     "type": "git",
