@@ -71,7 +71,7 @@ As of version 1.2.0 of browser-tabs-lock the package can also be used as in plai
 ```html
 <script
 	type="text/javascript"
-	src="https://cdn.jsdelivr.net/gh/supertokens/browser-tabs-lock@1.2/bundle.js">
+	src="https://cdn.jsdelivr.net/gh/supertokens/browser-tabs-lock@1.2/bundle/bundle.js">
 </script>
 ```
 
