@@ -165,7 +165,7 @@ describe("Test simple locking", async function() {
             doTask();
         })
 
-        await wait(5000);
+        await wait(10000);
 
         let success = await page.evaluate(() => {
             return didAcquireLock;
@@ -175,6 +175,81 @@ describe("Test simple locking", async function() {
             throw new Error("Acquiring the same lock twice in the same tab succeeded");
         }
 
+        await page.evaluate(() => {
+            shouldRelease = true;
+        });
+
+        await wait(10000);
+
+        success = await page.evaluate(() => {
+            return didAcquireLock;
+        });
+
+        if (!success) {
+            throw new Error("Acquiring lock failed even after first lock released");
+        }
+
         browser.close();
+    });
+
+    it("Test that multiple lock instances in the same tab using the same key works as expected", async function() {
+        const domain = "file://" + process.cwd() + "/test/singleTabMultiLock.html";
+        const browser = await puppeteer.launch({
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
+
+        const page0 = await browser.newPage();
+
+        // Reset localStorage for testing domain
+        await page0.goto(domain, {waitUntil: "load"});
+        await page0.evaluate(() => {
+            localStorage.setItem("tabs-global-counter", "0");
+        });
+        page0.close();
+
+        const page = await browser.newPage();
+        await page.goto(domain, {waitUntil: "load"});
+        await page.addScriptTag({path: `./bundle/bundle.js`, type: "text/javascript"});
+        await page.evaluate(() => {
+            start();
+        });
+
+        await wait(20000);
+
+        await page.evaluate(() => {
+            shouldStop = true;
+        });
+
+        let haveAllStopped = false;
+
+        while(!haveAllStopped) {
+            let stopValues = await page.evaluate(() => {
+                return didStopValues;
+            });
+
+            if (!stopValues.includes(false)) {
+                haveAllStopped = true;
+            }
+        }
+
+        let globalCounter = await page.evaluate(() => {
+            return parseInt(localStorage.getItem("tabs-global-counter"));
+        });
+
+        let localCounterValues = await page.evaluate(() => {
+            return localCounterValues;
+        });
+
+        let localCounterSum = 0;
+
+        for(let i = 0; i < localCounterValues.length; i++) {
+            localCounterSum += localCounterValues[i];
+        }
+
+        browser.close()
+
+        if (localCounterSum !== globalCounter || globalCounter <= 300) {
+            throw new Error(`Numbers dont match: \nGlobal counter = ${globalCounter} \n localCounterSum = ${localCounterSum}`);
+        }
     });
 });

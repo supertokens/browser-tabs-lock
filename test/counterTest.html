@@ -24,7 +24,7 @@
                     tabCounter+=1;
                     lock.releaseLock(lockingKey).then(() => {
                         setTimeout(() => {
-                        doTask();
+                            doTask();
                     }, Math.ceil(Math.random() * 10));
                     });
                 } else {
