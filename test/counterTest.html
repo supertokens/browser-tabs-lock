@@ -1,13 +1,14 @@
 <html>
-    <script type="text/javascript" src="../bundle/bundle-1.1.11.js"></script>
+    <script type="text/javascript" src="../bundle/bundle-2.0.0.js"></script>
     <script>
         let lockingKey = "testing-lock";
-        let lock = new supertokenslock.getInstance();
         let tabCounter = 0;
         let isStopped = false;
         let hasActuallyStopped = false;
 
         function doTask() {
+            let lock = new supertokenslock.getNewInstance();
+            
             lock.acquireLock(lockingKey)
             .then((success) => {
                 if (success) {

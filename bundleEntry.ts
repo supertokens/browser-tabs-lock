@@ -1,7 +1,7 @@
 import SuperTokensLock from "./index";
 
-var getInstance = () => {
+var getNewInstance = () => {
     return new SuperTokensLock();
 }
 
-export {getInstance};
+export {getNewInstance};
