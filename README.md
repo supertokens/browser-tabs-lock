@@ -4,6 +4,8 @@
 <a href="https://supertokens.io/discord">
         <img src="https://img.shields.io/discord/603466164219281420.svg?logo=discord"
             alt="chat on Discord"></a>
+	    
+[![CircleCI](https://circleci.com/gh/supertokens/browser-tabs-lock.svg?style=svg)](https://circleci.com/gh/supertokens/browser-tabs-lock)
 
 # Browser Tabs Lock
 
@@ -17,10 +19,10 @@ We are also offering free, one-to-one implementation support:
 
 
 ## Some things to note about:
-- This is not a reentrant lock. So please do not attempt to acquire a lock on the same key within the same tab if you are already currently holding that lock.
+- This is not a reentrant lock. So please do not attempt to re-acquire a lock using the same lock instance with the same key without releasing the acquired lock / key first. 
 - Theoretically speaking, it is impossible to have foolproof locking built on top of javascript in the browser. One can only make it so that in all practical scenarios, it emulates locking.
 
-## Installation:
+## Installation using Node:
 ```bash
 npm i --save browser-tabs-lock
 ```
@@ -34,7 +36,7 @@ async function lockingIsFun() {
 	if (await superTokensLock.acquireLock("hello", 5000)) {
 		// lock has been acquired... we can do anything we want now.
 		// ...
-		superTokensLock.releaseLock("hello");
+		await superTokensLock.releaseLock("hello");
 	} else {
 		// failed to acquire lock after trying for 5 seconds. 
 	}
@@ -51,15 +53,91 @@ superTokensLock.acquireLock("hello", 5000).then((success) => {
 	if (success) {
 		// lock has been acquired... we can do anything we want now.
 		// ...
-		superTokensLock.releaseLock("hello");
+		superTokensLock.releaseLock("hello").then(() => {
+			// lock released, continue
+		});
 	} else {
 		// failed to acquire lock after trying for 5 seconds. 
 	}
 });
 ```
 
+## Installation using plain JS
+
+As of version 2x of browser-tabs-lock the package can also be used as in plain javascript script.
+
+### Add the script
+
+```html
+<script
+	type="text/javascript"
+	src="https://cdn.jsdelivr.net/gh/supertokens/browser-tabs-lock@2.0/bundle-2.0.0.js">
+</script>
+```
+
+### Creating and using the lock
+
+```js
+let lock = new supertokenslock.getNewInstance();
+lock.acquireLock("hello")
+	.then(success => {
+		if (success) {
+			// lock has been acquired... we can do anything we want now.
+			...
+			lock.releaseLock("hello").then(() => {
+				// lock released, continue
+			});
+		} else {
+			// failed to acquire lock after trying for 5 seconds. 
+		}
+});
+```
+
 
 Also note, that if your web app only needs to work on google chrome, you can use the [Web Locks API](https://developer.mozilla.org/en-US/docs/Web/API/Lock) instead. This probably has true locking!
+
+## Migrating from 1x to 2x
+
+In some cases, version 1x did not entirely ensure mutual exclusion. To explain the problem:
+
+Lets say you create two lock instances L1 and L2. L1 acquires a lock with key K1 and is performing some action that takes 20 seconds to finish.
+
+Immediately after L1 acquires a lock, L2 tries to acquire a lock with the same key(K1). Normally L2 would not be able to acquire the lock until L1 releases it (in this case after 20 seconds) or when the tab that uses L1 is closed abruptly. However it is seen that sometimes L2 is able to acquire the lock automatically after 10 seconds (note that L1 has still not released the lock) - thereby breaking mutual exclusion.
+
+This bug has been fixed and released in version 2x of browser-tabs-lock. We highly recommend users to upgrade to 2x versions.
+
+After upgrading the only change that requires attention to is that ```lock.releaseLock``` is now an asynchronous function and needs to be handled accordingly.
+
+#### Using async/await
+
+Simply change calls to releaseLock from
+
+```js
+lock.releaseLock("hello");
+```
+
+to
+
+```js
+await lock.releaseLock("hello");
+```
+
+#### Using callbacks
+
+Simple change calls to releaseLock from
+
+```js
+lock.releaseLock("hello");
+```
+
+to
+
+```js
+lock.releaseLock("hello")
+	.then(() => {
+		// continue
+	});
+```
 
 ## Support, questions and bugs
 For now, we are most reachable via team@supertokens.io and via the GitHub issues feature
