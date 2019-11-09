@@ -64,14 +64,14 @@ superTokensLock.acquireLock("hello", 5000).then((success) => {
 
 ## Installation using plain JS
 
-As of version 2x of browser-tabs-lock the package can also be used as in plain javascript script.
+As of version 1.2.0 of browser-tabs-lock the package can also be used as in plain javascript script.
 
 ### Add the script
 
 ```html
 <script
 	type="text/javascript"
-	src="https://cdn.jsdelivr.net/gh/supertokens/browser-tabs-lock@2.0/bundle-2.0.0.js">
+	src="https://cdn.jsdelivr.net/gh/supertokens/browser-tabs-lock@1.2/bundle.js">
 </script>
 ```
 
@@ -96,15 +96,15 @@ lock.acquireLock("hello")
 
 Also note, that if your web app only needs to work on google chrome, you can use the [Web Locks API](https://developer.mozilla.org/en-US/docs/Web/API/Lock) instead. This probably has true locking!
 
-## Migrating from 1x to 2x
+## Migrating from 1.1x to 1.2x
 
-In some cases, version 1x did not entirely ensure mutual exclusion. To explain the problem:
+In some cases, version 1.1x did not entirely ensure mutual exclusion. To explain the problem:
 
 Lets say you create two lock instances L1 and L2. L1 acquires a lock with key K1 and is performing some action that takes 20 seconds to finish.
 
 Immediately after L1 acquires a lock, L2 tries to acquire a lock with the same key(K1). Normally L2 would not be able to acquire the lock until L1 releases it (in this case after 20 seconds) or when the tab that uses L1 is closed abruptly. However it is seen that sometimes L2 is able to acquire the lock automatically after 10 seconds (note that L1 has still not released the lock) - thereby breaking mutual exclusion.
 
-This bug has been fixed and released in version 2x of browser-tabs-lock. We highly recommend users to upgrade to 2x versions.
+This bug has been fixed and released in version 1.2x of browser-tabs-lock. We highly recommend users to upgrade to 1.2x versions.
 
 After upgrading the only change that requires attention to is that ```lock.releaseLock``` is now an asynchronous function and needs to be handled accordingly.
 
