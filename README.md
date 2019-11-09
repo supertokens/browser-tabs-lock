@@ -139,6 +139,18 @@ lock.releaseLock("hello")
 	});
 ```
 
+## Test coverage
+
+In an effort to make this package as production ready as possible we use puppeteer to run browser-tabs-lock in a headless browser environment and perform the following action:
+
+- Create 15 tabs in the browser. Each tab tries to acquire a lock with the same key(K1) and then updates a counter in local storage(C1) as well as updates a counter local to that tab(Ct). The local counter(Ct) serves as a way to know how many times that particular tab has updated local storage counter(C1). This process happens recursively for 20 seconds. After 20 seconds we signal all tabs to stop and after all of them have stopped, we calculate the sum of all the local counter values(sum(Ct...Cn)) for each tab and compare that with the value in local storage(C1). If the two values are the same and the value in local storage matches an estimated value then we know that all tabs use locking in a proper manner.
+
+- Create a tab(T1) which acquires a lock with a key(K1). We then create another tab(T2) that tries to acquire a lock with the same key(K1) and after waiting for some time we verify that the second tab(T2) does not acquire the lock. We close both tabs, note however that tab 1(T1) still had not released the lock. We create another tab(T3) that tries to acquire a lock with the same key(K1) and we verify that the tab is able to acquire the lock. This way we can be sure that locks are released when the tab that holds it(in this case T1) is closed abruptly.
+
+- Create a tab that creates two separate instances of the lock object I1 and I2. I1 acquires a lock with a key(K1), immediately after I2 tries to acquire the lock with the same key(K1). We verify that I2 cannot acquire the lock even after some time has passed. I1 then releases the lock and immediately after I2 tries the acquire it, we verify that I2 can now acquire the lock.
+
+- Create a tab that holds 15 separate lock instances. Each instance tries to acquire the lock using the same key(K1), it then updates a counter(C1) in local storage and also updates a local counter value specific to this instance (Ci). After incrementing the counters the instance recursively repeats this process. We wait for 20 seconds after which we signal each instance to stop and wait for all of them to stop. We then get the counter value from storage(C1) and add all local counter values(sum(Ci....Cn)) and compare the 2 values. We verify that the  values are the same and the value in local storage(C1) matches an estimated value. This way we can be sure that in a single tab multiple lock instances using the same key work correctly.
+
 ## Support, questions and bugs
 For now, we are most reachable via team@supertokens.io and via the GitHub issues feature
 
