@@ -1,0 +1,32 @@
+<html>
+    <script type="text/javascript" src="../bundle/bundle-1.1.11.js"></script>
+    <script>
+
+        let lockingKey = "testing-lock-3";
+        let lock = new supertokenslock.getInstance();
+        let lock2 = new supertokenslock.getInstance();
+        let didAcquireLock = true;
+
+        function doTask() {
+            lock.acquireLock(lockingKey, 2000)
+            .then(success => {
+                if (success) {
+                    lock2.acquireLock(lockingKey, 2000)
+                        .then(success2 => {
+                            didAcquireLock = success2;
+                        });
+                } else {
+                    doTask();
+                }
+            });
+        }
+
+        doTask();
+
+    </script>
+    <body>
+        <div>
+            HI
+        </div>
+    </body>
+</html>

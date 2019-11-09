@@ -1,3 +1,4 @@
+import getProcessLock from "./processLock";
 /**
  * @author: SuperTokens (https://github.com/supertokens)
  * This library was created as a part of a larger project, SuperTokens(https://supertokens.io) - the best session management solution.
@@ -43,6 +44,7 @@ function generateRandomString(length: number): string {
         const INDEX = Math.floor(Math.random() * CHARS.length);
         randomstring += CHARS[INDEX];
     }
+    //TODO: add supertokens to the random string, total length will be 21
     return randomstring;
 }
 
@@ -58,6 +60,7 @@ function getLockId(): string {
 export default class SuperTokensLock {
     static waiters: Array<any> | undefined = undefined;
     id: string;
+    acquiredIatSet: Set<String>  = new Set<String>();
 
     constructor() {
         this.id = getLockId();
@@ -65,6 +68,7 @@ export default class SuperTokensLock {
         this.releaseLock = this.releaseLock.bind(this);
         this.releaseLock__private__ = this.releaseLock__private__.bind(this);
         this.waitForSomethingToChange = this.waitForSomethingToChange.bind(this);
+        this.refreshLockWhileAcquired = this.refreshLockWhileAcquired.bind(this);
         if (SuperTokensLock.waiters === undefined) {
             SuperTokensLock.waiters = [];
         }
@@ -95,23 +99,49 @@ export default class SuperTokensLock {
                     id: this.id,
                     iat,
                     timeoutKey: TIMEOUT_KEY,
-                    timeAcquired: Date.now()
+                    timeAcquired: Date.now(),
+                    timeRefreshed: Date.now()
                 }));
                 await delay(30);    // this is to prevent race conditions. This time must be more than the time it takes for storage.setItem
                 let lockObjPostDelay = STORAGE.getItem(STORAGE_KEY);
                 if (lockObjPostDelay !== null) {
                     lockObjPostDelay = JSON.parse(lockObjPostDelay);
                     if (lockObjPostDelay.id === this.id && lockObjPostDelay.iat === iat) {
+                        this.acquiredIatSet.add(iat);
+                        this.refreshLockWhileAcquired(STORAGE_KEY, iat);
                         return true;
                     }
                 }
             } else {
                 lockCorrector();
                 await this.waitForSomethingToChange(MAX_TIME);
+
             }
             iat = Date.now() + generateRandomString(4);
         }
         return false;
+    }
+
+    async refreshLockWhileAcquired(storageKey: string, iat: string) {
+        setTimeout(async () => {
+            await getProcessLock().lock(iat);
+            if (!this.acquiredIatSet.has(iat)) {
+                getProcessLock().unlock(iat);
+                return;
+            }
+            const STORAGE = window.localStorage;
+            let lockObj = STORAGE.getItem(storageKey);
+            if (lockObj !== null) {
+                lockObj = JSON.parse(lockObj);
+                lockObj.timeRefreshed = Date.now();
+                STORAGE.setItem(storageKey, JSON.stringify(lockObj));
+                getProcessLock().unlock(iat);
+            } else {
+                getProcessLock().unlock(iat);
+                return;
+            }
+            this.refreshLockWhileAcquired(storageKey, iat);
+        }, 1000);
     }
 
     async waitForSomethingToChange(MAX_TIME: number) {
@@ -173,19 +203,18 @@ export default class SuperTokensLock {
      * @returns {void}
      * @description Release a lock.
      */
-    releaseLock(lockKey: string) {
-        return this.releaseLock__private__(lockKey);
+    async releaseLock(lockKey: string) {
+        return await this.releaseLock__private__(lockKey);
     }
 
     /**
      * @function releaseLock
      * @memberOf Lock
      * @param {string} lockKey - Key for which lock is being released
-     * @param {number} [iat=null] - Will not be null only if called via setTimeout from acquireLock
      * @returns {void}
      * @description Release a lock.
      */
-    releaseLock__private__(lockKey: string, iat = null) {
+    async releaseLock__private__(lockKey: string) {
         const STORAGE = window.localStorage;
         const STORAGE_KEY = `${LOCK_STORAGE_KEY}-${lockKey}`;
         let lockObj = STORAGE.getItem(STORAGE_KEY);
@@ -193,8 +222,14 @@ export default class SuperTokensLock {
             return;
         }
         lockObj = JSON.parse(lockObj);
-        if (lockObj.id === this.id && (iat === null || lockObj.iat === iat)) {
+        if (lockObj.id === this.id) {
+            await getProcessLock().lock(lockObj.iat);
+
+            this.acquiredIatSet.delete(lockObj.iat);
             STORAGE.removeItem(STORAGE_KEY);
+
+            getProcessLock().unlock(lockObj.iat);
+
             SuperTokensLock.notifyWaiters();
         }
     }
@@ -207,7 +242,7 @@ export default class SuperTokensLock {
  *              released, this function will release those locks
  */
 function lockCorrector() {
-    const MIN_ALLOWED_TIME = Date.now() - 10000;
+    const MIN_ALLOWED_TIME = Date.now() - 5000;
     const STORAGE = window.localStorage;
     const KEYS = Object.keys(STORAGE);
     let notifyWaiters = false;
@@ -217,7 +252,8 @@ function lockCorrector() {
             let lockObj = STORAGE.getItem(LOCK_KEY);
             if (lockObj !== null) {
                 lockObj = JSON.parse(lockObj);
-                if (lockObj.timeAcquired < MIN_ALLOWED_TIME) {
+                if ((lockObj.timeRefreshed === undefined && lockObj.timeAcquired < MIN_ALLOWED_TIME) ||
+                    (lockObj.timeRefreshed !== undefined && lockObj.timeRefreshed < MIN_ALLOWED_TIME)) {
                     STORAGE.removeItem(LOCK_KEY);
                     notifyWaiters = true;
                 }

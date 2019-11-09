@@ -1,14 +1,4 @@
 "use strict";
-/**
- * @author: SuperTokens (https://github.com/supertokens)
- * This library was created as a part of a larger project, SuperTokens(https://supertokens.io) - the best session management solution.
- * You can also check out our other projects on https://github.com/supertokens
- *
- * To contribute to this package visit https://github.com/supertokens/browser-tabs-lock
- * If you face any problems you can file an issue on https://github.com/supertokens/browser-tabs-lock/issues
- *
- * If you have any questions or if you just want to say hi visit https://supertokens.io/discord
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -45,6 +35,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var processLock_1 = require("./processLock");
+/**
+ * @author: SuperTokens (https://github.com/supertokens)
+ * This library was created as a part of a larger project, SuperTokens(https://supertokens.io) - the best session management solution.
+ * You can also check out our other projects on https://github.com/supertokens
+ *
+ * To contribute to this package visit https://github.com/supertokens/browser-tabs-lock
+ * If you face any problems you can file an issue on https://github.com/supertokens/browser-tabs-lock/issues
+ *
+ * If you have any questions or if you just want to say hi visit https://supertokens.io/discord
+ */
 /**
  * @constant
  * @type {string}
@@ -73,6 +74,7 @@ function generateRandomString(length) {
         var INDEX = Math.floor(Math.random() * CHARS.length);
         randomstring += CHARS[INDEX];
     }
+    //TODO: add supertokens to the random string, total length will be 21
     return randomstring;
 }
 /**
@@ -85,11 +87,13 @@ function getLockId() {
 }
 var SuperTokensLock = /** @class */ (function () {
     function SuperTokensLock() {
+        this.acquiredIatSet = new Set();
         this.id = getLockId();
         this.acquireLock = this.acquireLock.bind(this);
         this.releaseLock = this.releaseLock.bind(this);
         this.releaseLock__private__ = this.releaseLock__private__.bind(this);
         this.waitForSomethingToChange = this.waitForSomethingToChange.bind(this);
+        this.refreshLockWhileAcquired = this.refreshLockWhileAcquired.bind(this);
         if (SuperTokensLock.waiters === undefined) {
             SuperTokensLock.waiters = [];
         }
@@ -130,7 +134,8 @@ var SuperTokensLock = /** @class */ (function () {
                             id: this.id,
                             iat: iat,
                             timeoutKey: TIMEOUT_KEY,
-                            timeAcquired: Date.now()
+                            timeAcquired: Date.now(),
+                            timeRefreshed: Date.now()
                         }));
                         return [4 /*yield*/, delay(30)];
                     case 3:
@@ -139,6 +144,8 @@ var SuperTokensLock = /** @class */ (function () {
                         if (lockObjPostDelay !== null) {
                             lockObjPostDelay = JSON.parse(lockObjPostDelay);
                             if (lockObjPostDelay.id === this.id && lockObjPostDelay.iat === iat) {
+                                this.acquiredIatSet.add(iat);
+                                this.refreshLockWhileAcquired(STORAGE_KEY, iat);
                                 return [2 /*return*/, true];
                             }
                         }
@@ -154,6 +161,42 @@ var SuperTokensLock = /** @class */ (function () {
                         return [3 /*break*/, 1];
                     case 7: return [2 /*return*/, false];
                 }
+            });
+        });
+    };
+    SuperTokensLock.prototype.refreshLockWhileAcquired = function (storageKey, iat) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                setTimeout(function () { return __awaiter(_this, void 0, void 0, function () {
+                    var STORAGE, lockObj;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, processLock_1.default().lock(iat)];
+                            case 1:
+                                _a.sent();
+                                if (!this.acquiredIatSet.has(iat)) {
+                                    processLock_1.default().unlock(iat);
+                                    return [2 /*return*/];
+                                }
+                                STORAGE = window.localStorage;
+                                lockObj = STORAGE.getItem(storageKey);
+                                if (lockObj !== null) {
+                                    lockObj = JSON.parse(lockObj);
+                                    lockObj.timeRefreshed = Date.now();
+                                    STORAGE.setItem(storageKey, JSON.stringify(lockObj));
+                                    processLock_1.default().unlock(iat);
+                                }
+                                else {
+                                    processLock_1.default().unlock(iat);
+                                    return [2 /*return*/];
+                                }
+                                this.refreshLockWhileAcquired(storageKey, iat);
+                                return [2 /*return*/];
+                        }
+                    });
+                }); }, 1000);
+                return [2 /*return*/];
             });
         });
     };
@@ -223,29 +266,48 @@ var SuperTokensLock = /** @class */ (function () {
      * @description Release a lock.
      */
     SuperTokensLock.prototype.releaseLock = function (lockKey) {
-        return this.releaseLock__private__(lockKey);
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.releaseLock__private__(lockKey)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
     };
     /**
      * @function releaseLock
      * @memberOf Lock
      * @param {string} lockKey - Key for which lock is being released
-     * @param {number} [iat=null] - Will not be null only if called via setTimeout from acquireLock
      * @returns {void}
      * @description Release a lock.
      */
-    SuperTokensLock.prototype.releaseLock__private__ = function (lockKey, iat) {
-        if (iat === void 0) { iat = null; }
-        var STORAGE = window.localStorage;
-        var STORAGE_KEY = LOCK_STORAGE_KEY + "-" + lockKey;
-        var lockObj = STORAGE.getItem(STORAGE_KEY);
-        if (lockObj === null) {
-            return;
-        }
-        lockObj = JSON.parse(lockObj);
-        if (lockObj.id === this.id && (iat === null || lockObj.iat === iat)) {
-            STORAGE.removeItem(STORAGE_KEY);
-            SuperTokensLock.notifyWaiters();
-        }
+    SuperTokensLock.prototype.releaseLock__private__ = function (lockKey) {
+        return __awaiter(this, void 0, void 0, function () {
+            var STORAGE, STORAGE_KEY, lockObj;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        STORAGE = window.localStorage;
+                        STORAGE_KEY = LOCK_STORAGE_KEY + "-" + lockKey;
+                        lockObj = STORAGE.getItem(STORAGE_KEY);
+                        if (lockObj === null) {
+                            return [2 /*return*/];
+                        }
+                        lockObj = JSON.parse(lockObj);
+                        if (!(lockObj.id === this.id)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, processLock_1.default().lock(lockObj.iat)];
+                    case 1:
+                        _a.sent();
+                        this.acquiredIatSet.delete(lockObj.iat);
+                        STORAGE.removeItem(STORAGE_KEY);
+                        processLock_1.default().unlock(lockObj.iat);
+                        SuperTokensLock.notifyWaiters();
+                        _a.label = 2;
+                    case 2: return [2 /*return*/];
+                }
+            });
+        });
     };
     SuperTokensLock.waiters = undefined;
     return SuperTokensLock;
@@ -258,7 +320,7 @@ exports.default = SuperTokensLock;
  *              released, this function will release those locks
  */
 function lockCorrector() {
-    var MIN_ALLOWED_TIME = Date.now() - 10000;
+    var MIN_ALLOWED_TIME = Date.now() - 5000;
     var STORAGE = window.localStorage;
     var KEYS = Object.keys(STORAGE);
     var notifyWaiters = false;
@@ -268,7 +330,8 @@ function lockCorrector() {
             var lockObj = STORAGE.getItem(LOCK_KEY);
             if (lockObj !== null) {
                 lockObj = JSON.parse(lockObj);
-                if (lockObj.timeAcquired < MIN_ALLOWED_TIME) {
+                if ((lockObj.timeRefreshed === undefined && lockObj.timeAcquired < MIN_ALLOWED_TIME) ||
+                    (lockObj.timeRefreshed !== undefined && lockObj.timeRefreshed < MIN_ALLOWED_TIME)) {
                     STORAGE.removeItem(LOCK_KEY);
                     notifyWaiters = true;
                 }
