@@ -12,7 +12,7 @@ jobs:
       - image: circleci/node:8.10.0
     steps:
       - checkout
-      - run: npm -i d
+      - run: npm i -d
       - run: npm run test
 
 workflows:
