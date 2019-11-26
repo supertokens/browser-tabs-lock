@@ -74,7 +74,6 @@ function generateRandomString(length) {
         var INDEX = Math.floor(Math.random() * CHARS.length);
         randomstring += CHARS[INDEX];
     }
-    //TODO: add supertokens to the random string, total length will be 21
     return randomstring;
 }
 /**
@@ -151,7 +150,7 @@ var SuperTokensLock = /** @class */ (function () {
                         }
                         return [3 /*break*/, 6];
                     case 4:
-                        lockCorrector();
+                        SuperTokensLock.lockCorrector();
                         return [4 /*yield*/, this.waitForSomethingToChange(MAX_TIME)];
                     case 5:
                         _a.sent();
@@ -309,36 +308,36 @@ var SuperTokensLock = /** @class */ (function () {
             });
         });
     };
+    /**
+     * @function lockCorrector
+     * @returns {void}
+     * @description If a lock is acquired by a tab and the tab is closed before the lock is
+     *              released, this function will release those locks
+     */
+    SuperTokensLock.lockCorrector = function () {
+        var MIN_ALLOWED_TIME = Date.now() - 5000;
+        var STORAGE = window.localStorage;
+        var KEYS = Object.keys(STORAGE);
+        var notifyWaiters = false;
+        for (var i = 0; i < KEYS.length; i++) {
+            var LOCK_KEY = KEYS[i];
+            if (LOCK_KEY.includes(LOCK_STORAGE_KEY)) {
+                var lockObj = STORAGE.getItem(LOCK_KEY);
+                if (lockObj !== null) {
+                    lockObj = JSON.parse(lockObj);
+                    if ((lockObj.timeRefreshed === undefined && lockObj.timeAcquired < MIN_ALLOWED_TIME) ||
+                        (lockObj.timeRefreshed !== undefined && lockObj.timeRefreshed < MIN_ALLOWED_TIME)) {
+                        STORAGE.removeItem(LOCK_KEY);
+                        notifyWaiters = true;
+                    }
+                }
+            }
+        }
+        if (notifyWaiters) {
+            SuperTokensLock.notifyWaiters();
+        }
+    };
     SuperTokensLock.waiters = undefined;
     return SuperTokensLock;
 }());
 exports.default = SuperTokensLock;
-/**
- * @function lockCorrector
- * @returns {void}
- * @description If a lock is acquired by a tab and the tab is closed before the lock is
- *              released, this function will release those locks
- */
-function lockCorrector() {
-    var MIN_ALLOWED_TIME = Date.now() - 5000;
-    var STORAGE = window.localStorage;
-    var KEYS = Object.keys(STORAGE);
-    var notifyWaiters = false;
-    for (var i = 0; i < KEYS.length; i++) {
-        var LOCK_KEY = KEYS[i];
-        if (LOCK_KEY.includes(LOCK_STORAGE_KEY)) {
-            var lockObj = STORAGE.getItem(LOCK_KEY);
-            if (lockObj !== null) {
-                lockObj = JSON.parse(lockObj);
-                if ((lockObj.timeRefreshed === undefined && lockObj.timeAcquired < MIN_ALLOWED_TIME) ||
-                    (lockObj.timeRefreshed !== undefined && lockObj.timeRefreshed < MIN_ALLOWED_TIME)) {
-                    STORAGE.removeItem(LOCK_KEY);
-                    notifyWaiters = true;
-                }
-            }
-        }
-    }
-    if (notifyWaiters) {
-        SuperTokensLock.notifyWaiters();
-    }
-}
