@@ -1,2 +1,10 @@
 **/*.ts
 !**/*.d.ts
+.git/
+test/
+hooks/
+bundle/
+.circleci/
+webpack.config.js
+tsconfig.json
+setupHooks
