@@ -1,6 +1,6 @@
 {
   "name": "browser-tabs-lock",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "provides locking mechanism to sync across browser tabs",
   "main": "index.js",
   "scripts": {
