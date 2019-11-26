@@ -1,4 +1,5 @@
-import getProcessLock from "./processLock";
+import getProcessLock from './processLock';
+
 /**
  * @author: SuperTokens (https://github.com/supertokens)
  * This library was created as a part of a larger project, SuperTokens(https://supertokens.io) - the best session management solution.
@@ -44,7 +45,6 @@ function generateRandomString(length: number): string {
         const INDEX = Math.floor(Math.random() * CHARS.length);
         randomstring += CHARS[INDEX];
     }
-    //TODO: add supertokens to the random string, total length will be 21
     return randomstring;
 }
 
@@ -58,9 +58,9 @@ function getLockId(): string {
 }
 
 export default class SuperTokensLock {
-    static waiters: Array<any> | undefined = undefined;
-    id: string;
-    acquiredIatSet: Set<String>  = new Set<String>();
+    private static waiters: Array<any> | undefined = undefined;
+    private id: string;
+    private acquiredIatSet: Set<String> = new Set<String>();
 
     constructor() {
         this.id = getLockId();
@@ -113,7 +113,7 @@ export default class SuperTokensLock {
                     }
                 }
             } else {
-                lockCorrector();
+                SuperTokensLock.lockCorrector();
                 await this.waitForSomethingToChange(MAX_TIME);
 
             }
@@ -122,7 +122,7 @@ export default class SuperTokensLock {
         return false;
     }
 
-    async refreshLockWhileAcquired(storageKey: string, iat: string) {
+    private async refreshLockWhileAcquired(storageKey: string, iat: string) {
         setTimeout(async () => {
             await getProcessLock().lock(iat);
             if (!this.acquiredIatSet.has(iat)) {
@@ -144,7 +144,7 @@ export default class SuperTokensLock {
         }, 1000);
     }
 
-    async waitForSomethingToChange(MAX_TIME: number) {
+    private async waitForSomethingToChange(MAX_TIME: number) {
         await new Promise(resolve => {
             let resolvedCalled = false;
             let startedAt = Date.now();
@@ -173,7 +173,7 @@ export default class SuperTokensLock {
         });
     }
 
-    static addToWaiting(func: any) {
+    private static addToWaiting(func: any) {
         this.removeFromWaiting(func);
         if (SuperTokensLock.waiters === undefined) {
             return;
@@ -181,14 +181,14 @@ export default class SuperTokensLock {
         SuperTokensLock.waiters.push(func);
     }
 
-    static removeFromWaiting(func: any) {
+    private static removeFromWaiting(func: any) {
         if (SuperTokensLock.waiters === undefined) {
             return;
         }
         SuperTokensLock.waiters = SuperTokensLock.waiters.filter(i => i !== func);
     }
 
-    static notifyWaiters() {
+    private static notifyWaiters() {
         if (SuperTokensLock.waiters === undefined) {
             return;
         }
@@ -214,7 +214,7 @@ export default class SuperTokensLock {
      * @returns {void}
      * @description Release a lock.
      */
-    async releaseLock__private__(lockKey: string) {
+    private async releaseLock__private__(lockKey: string) {
         const STORAGE = window.localStorage;
         const STORAGE_KEY = `${LOCK_STORAGE_KEY}-${lockKey}`;
         let lockObj = STORAGE.getItem(STORAGE_KEY);
@@ -233,34 +233,34 @@ export default class SuperTokensLock {
             SuperTokensLock.notifyWaiters();
         }
     }
-}
 
-/**
- * @function lockCorrector
- * @returns {void}
- * @description If a lock is acquired by a tab and the tab is closed before the lock is
- *              released, this function will release those locks
- */
-function lockCorrector() {
-    const MIN_ALLOWED_TIME = Date.now() - 5000;
-    const STORAGE = window.localStorage;
-    const KEYS = Object.keys(STORAGE);
-    let notifyWaiters = false;
-    for (let i = 0; i < KEYS.length; i++) {
-        const LOCK_KEY = KEYS[i];
-        if (LOCK_KEY.includes(LOCK_STORAGE_KEY)) {
-            let lockObj = STORAGE.getItem(LOCK_KEY);
-            if (lockObj !== null) {
-                lockObj = JSON.parse(lockObj);
-                if ((lockObj.timeRefreshed === undefined && lockObj.timeAcquired < MIN_ALLOWED_TIME) ||
-                    (lockObj.timeRefreshed !== undefined && lockObj.timeRefreshed < MIN_ALLOWED_TIME)) {
-                    STORAGE.removeItem(LOCK_KEY);
-                    notifyWaiters = true;
+    /**
+     * @function lockCorrector
+     * @returns {void}
+     * @description If a lock is acquired by a tab and the tab is closed before the lock is
+     *              released, this function will release those locks
+     */
+    private static lockCorrector() {
+        const MIN_ALLOWED_TIME = Date.now() - 5000;
+        const STORAGE = window.localStorage;
+        const KEYS = Object.keys(STORAGE);
+        let notifyWaiters = false;
+        for (let i = 0; i < KEYS.length; i++) {
+            const LOCK_KEY = KEYS[i];
+            if (LOCK_KEY.includes(LOCK_STORAGE_KEY)) {
+                let lockObj = STORAGE.getItem(LOCK_KEY);
+                if (lockObj !== null) {
+                    lockObj = JSON.parse(lockObj);
+                    if ((lockObj.timeRefreshed === undefined && lockObj.timeAcquired < MIN_ALLOWED_TIME) ||
+                        (lockObj.timeRefreshed !== undefined && lockObj.timeRefreshed < MIN_ALLOWED_TIME)) {
+                        STORAGE.removeItem(LOCK_KEY);
+                        notifyWaiters = true;
+                    }
                 }
             }
         }
-    }
-    if (notifyWaiters) {
-        SuperTokensLock.notifyWaiters();
+        if (notifyWaiters) {
+            SuperTokensLock.notifyWaiters();
+        }
     }
 }

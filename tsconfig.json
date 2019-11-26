@@ -1,13 +1,16 @@
 {
     "compilerOptions": {
         "target": "es5",
-        "lib": ["es6"],
+        "lib": [
+            "es6"
+        ],
         "noImplicitAny": true,
         "allowSyntheticDefaultImports": true,
         "strictNullChecks": true,
         "noImplicitThis": true,
         "module": "commonJS",
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "declaration": true
     },
     "compileOnSave": true
 }

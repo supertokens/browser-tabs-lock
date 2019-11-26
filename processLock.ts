@@ -1,3 +1,4 @@
+declare let setTimeout: any;
 class ProcessLocking {
     static instance: undefined | ProcessLocking;
     private locked: Map<string, (() => void)[]> = new Map<string, (() => void)[]>();
