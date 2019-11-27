@@ -16,7 +16,6 @@ Using this package, you can easily get lock functionality across tabs on all mod
 
 We are also offering free, one-to-one implementation support:
 - Schedule a short call with us on https://calendly.com/supertokens-rishabh.
-- Whatsapp us on +91-7021000012 saying “SuperTokens”.
 
 
 ## Some things to note about:
