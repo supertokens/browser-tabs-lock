@@ -90,6 +90,7 @@ export default class SuperTokensLock {
         const STORAGE_KEY = `${LOCK_STORAGE_KEY}-${lockKey}`;
         const STORAGE = window.localStorage;
         while (Date.now() < MAX_TIME) {
+            await delay(30);
             let lockObj = STORAGE.getItem(STORAGE_KEY);
             if (lockObj === null) {
                 const TIMEOUT_KEY = `${this.id}-${lockKey}-${iat}`;

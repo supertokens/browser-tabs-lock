@@ -120,13 +120,16 @@ var SuperTokensLock = /** @class */ (function () {
                         STORAGE = window.localStorage;
                         _a.label = 1;
                     case 1:
-                        if (!(Date.now() < MAX_TIME)) return [3 /*break*/, 7];
+                        if (!(Date.now() < MAX_TIME)) return [3 /*break*/, 8];
+                        return [4 /*yield*/, delay(30)];
+                    case 2:
+                        _a.sent();
                         lockObj = STORAGE.getItem(STORAGE_KEY);
-                        if (!(lockObj === null)) return [3 /*break*/, 4];
+                        if (!(lockObj === null)) return [3 /*break*/, 5];
                         TIMEOUT_KEY = this.id + "-" + lockKey + "-" + iat;
                         // there is a problem if setItem happens at the exact same time for 2 different processes.. so we add some random delay here.
                         return [4 /*yield*/, delay(Math.floor(Math.random() * 25))];
-                    case 2:
+                    case 3:
                         // there is a problem if setItem happens at the exact same time for 2 different processes.. so we add some random delay here.
                         _a.sent();
                         STORAGE.setItem(STORAGE_KEY, JSON.stringify({
@@ -137,7 +140,7 @@ var SuperTokensLock = /** @class */ (function () {
                             timeRefreshed: Date.now()
                         }));
                         return [4 /*yield*/, delay(30)];
-                    case 3:
+                    case 4:
                         _a.sent(); // this is to prevent race conditions. This time must be more than the time it takes for storage.setItem
                         lockObjPostDelay = STORAGE.getItem(STORAGE_KEY);
                         if (lockObjPostDelay !== null) {
@@ -148,17 +151,17 @@ var SuperTokensLock = /** @class */ (function () {
                                 return [2 /*return*/, true];
                             }
                         }
-                        return [3 /*break*/, 6];
-                    case 4:
+                        return [3 /*break*/, 7];
+                    case 5:
                         SuperTokensLock.lockCorrector();
                         return [4 /*yield*/, this.waitForSomethingToChange(MAX_TIME)];
-                    case 5:
-                        _a.sent();
-                        _a.label = 6;
                     case 6:
+                        _a.sent();
+                        _a.label = 7;
+                    case 7:
                         iat = Date.now() + generateRandomString(4);
                         return [3 /*break*/, 1];
-                    case 7: return [2 /*return*/, false];
+                    case 8: return [2 /*return*/, false];
                 }
             });
         });
