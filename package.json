@@ -1,6 +1,6 @@
 {
   "name": "browser-tabs-lock",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "description": "provides locking mechanism to sync across browser tabs",
   "main": "index.js",
   "scripts": {
@@ -21,6 +21,9 @@
     "mocha-jsdom": "2.0.0",
     "webpack": "^4.35.0",
     "webpack-cli": "^3.3.5"
+  },
+  "dependencies": {
+    "lodash": ">=4.17.19"
   },
   "keywords": [
     "browser",
