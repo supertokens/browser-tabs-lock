@@ -6,7 +6,6 @@
             alt="chat on Discord"></a>
 [![Slack](https://img.shields.io/badge/slack-chat-brightgreen?logo=slack)](https://join.slack.com/t/webmobilesecurity/shared_invite/enQtODM4MDM2MTQ1MDYyLTFiNmNhYzRlNGNjODhkNjc5MDRlYTBmZTBiNjFhOTFhYjI1MTc3ZWI2ZjY3Y2M3ZjY1MGJhZmRiNDFjNDNjOTM)
 	    
-[![CircleCI](https://circleci.com/gh/supertokens/browser-tabs-lock.svg?style=svg)](https://circleci.com/gh/supertokens/browser-tabs-lock)
 
 # Browser Tabs Lock
 
