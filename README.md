@@ -11,7 +11,7 @@
 
 Using this package, you can easily get lock functionality across tabs on all modern browsers.
 
-**This library was originally designed to be used as a part of our project - SuperTokens - the most secure session management solution for web and mobile apps. Support us by checking it out [here](https://supertokens.io).**
+**This library was originally designed to be used as a part of our project - SuperTokens - an open source auth solution for web and mobile apps. Support us by checking it out [here](https://supertokens.io).**
 
 We are also offering free, one-to-one implementation support:
 - Schedule a short call with us on https://calendly.com/supertokens-rishabh.
