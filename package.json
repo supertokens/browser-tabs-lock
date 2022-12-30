@@ -17,7 +17,7 @@
   "devDependencies": {
     "puppeteer": "2.0.0",
     "typescript": "3.5.2",
-    "mocha": "6.1.4",
+    "mocha": "10.2.0",
     "mocha-jsdom": "2.0.0",
     "webpack": "^4.35.0",
     "webpack-cli": "^3.3.5"
