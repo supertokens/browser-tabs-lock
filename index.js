@@ -365,7 +365,16 @@ var SuperTokensLock = /** @class */ (function () {
     SuperTokensLock.lockCorrector = function (storageHandler) {
         var MIN_ALLOWED_TIME = Date.now() - 5000;
         var STORAGE = storageHandler;
-        var KEYS = Object.keys(STORAGE);
+        var KEYS = [];
+        var currIndex = 0;
+        while (true) {
+            var key = STORAGE.keySync(currIndex);
+            if (key === null) {
+                break;
+            }
+            KEYS.push(key);
+            currIndex++;
+        }
         var notifyWaiters = false;
         for (var i = 0; i < KEYS.length; i++) {
             var LOCK_KEY = KEYS[i];
