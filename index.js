@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var processLock_1 = require("./processLock");
 /**
@@ -53,6 +54,48 @@ var processLock_1 = require("./processLock");
  * @description All the locks taken by this package will have this as prefix
 */
 var LOCK_STORAGE_KEY = 'browser-tabs-lock-key';
+var DEFAULT_STORAGE_HANDLER = {
+    key: function (index) { return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            throw new Error("Unsupported");
+        });
+    }); },
+    getItem: function (key) { return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            throw new Error("Unsupported");
+        });
+    }); },
+    clear: function () { return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, window.localStorage.clear()];
+        });
+    }); },
+    removeItem: function (key) { return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            throw new Error("Unsupported");
+        });
+    }); },
+    setItem: function (key, value) { return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            throw new Error("Unsupported");
+        });
+    }); },
+    keySync: function (index) {
+        return window.localStorage.key(index);
+    },
+    getItemSync: function (key) {
+        return window.localStorage.getItem(key);
+    },
+    clearSync: function () {
+        return window.localStorage.clear();
+    },
+    removeItemSync: function (key) {
+        return window.localStorage.removeItem(key);
+    },
+    setItemSync: function (key, value) {
+        return window.localStorage.setItem(key, value);
+    },
+};
 /**
  * @function delay
  * @param {number} milliseconds - How long the delay should be in terms of milliseconds
@@ -85,14 +128,16 @@ function getLockId() {
     return Date.now().toString() + generateRandomString(15);
 }
 var SuperTokensLock = /** @class */ (function () {
-    function SuperTokensLock() {
+    function SuperTokensLock(storageHandler) {
         this.acquiredIatSet = new Set();
+        this.storageHandler = undefined;
         this.id = getLockId();
         this.acquireLock = this.acquireLock.bind(this);
         this.releaseLock = this.releaseLock.bind(this);
         this.releaseLock__private__ = this.releaseLock__private__.bind(this);
         this.waitForSomethingToChange = this.waitForSomethingToChange.bind(this);
         this.refreshLockWhileAcquired = this.refreshLockWhileAcquired.bind(this);
+        this.storageHandler = storageHandler;
         if (SuperTokensLock.waiters === undefined) {
             SuperTokensLock.waiters = [];
         }
@@ -110,21 +155,21 @@ var SuperTokensLock = /** @class */ (function () {
     SuperTokensLock.prototype.acquireLock = function (lockKey, timeout) {
         if (timeout === void 0) { timeout = 5000; }
         return __awaiter(this, void 0, void 0, function () {
-            var iat, MAX_TIME, STORAGE_KEY, STORAGE, lockObj, TIMEOUT_KEY, lockObjPostDelay;
+            var iat, MAX_TIME, STORAGE_KEY, STORAGE, lockObj, TIMEOUT_KEY, lockObjPostDelay, parsedLockObjPostDelay;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         iat = Date.now() + generateRandomString(4);
                         MAX_TIME = Date.now() + timeout;
                         STORAGE_KEY = LOCK_STORAGE_KEY + "-" + lockKey;
-                        STORAGE = window.localStorage;
+                        STORAGE = this.storageHandler === undefined ? DEFAULT_STORAGE_HANDLER : this.storageHandler;
                         _a.label = 1;
                     case 1:
                         if (!(Date.now() < MAX_TIME)) return [3 /*break*/, 8];
                         return [4 /*yield*/, delay(30)];
                     case 2:
                         _a.sent();
-                        lockObj = STORAGE.getItem(STORAGE_KEY);
+                        lockObj = STORAGE.getItemSync(STORAGE_KEY);
                         if (!(lockObj === null)) return [3 /*break*/, 5];
                         TIMEOUT_KEY = this.id + "-" + lockKey + "-" + iat;
                         // there is a problem if setItem happens at the exact same time for 2 different processes.. so we add some random delay here.
@@ -132,7 +177,7 @@ var SuperTokensLock = /** @class */ (function () {
                     case 3:
                         // there is a problem if setItem happens at the exact same time for 2 different processes.. so we add some random delay here.
                         _a.sent();
-                        STORAGE.setItem(STORAGE_KEY, JSON.stringify({
+                        STORAGE.setItemSync(STORAGE_KEY, JSON.stringify({
                             id: this.id,
                             iat: iat,
                             timeoutKey: TIMEOUT_KEY,
@@ -142,10 +187,10 @@ var SuperTokensLock = /** @class */ (function () {
                         return [4 /*yield*/, delay(30)];
                     case 4:
                         _a.sent(); // this is to prevent race conditions. This time must be more than the time it takes for storage.setItem
-                        lockObjPostDelay = STORAGE.getItem(STORAGE_KEY);
+                        lockObjPostDelay = STORAGE.getItemSync(STORAGE_KEY);
                         if (lockObjPostDelay !== null) {
-                            lockObjPostDelay = JSON.parse(lockObjPostDelay);
-                            if (lockObjPostDelay.id === this.id && lockObjPostDelay.iat === iat) {
+                            parsedLockObjPostDelay = JSON.parse(lockObjPostDelay);
+                            if (parsedLockObjPostDelay.id === this.id && parsedLockObjPostDelay.iat === iat) {
                                 this.acquiredIatSet.add(iat);
                                 this.refreshLockWhileAcquired(STORAGE_KEY, iat);
                                 return [2 /*return*/, true];
@@ -153,7 +198,7 @@ var SuperTokensLock = /** @class */ (function () {
                         }
                         return [3 /*break*/, 7];
                     case 5:
-                        SuperTokensLock.lockCorrector();
+                        SuperTokensLock.lockCorrector(this.storageHandler === undefined ? DEFAULT_STORAGE_HANDLER : this.storageHandler);
                         return [4 /*yield*/, this.waitForSomethingToChange(MAX_TIME)];
                     case 6:
                         _a.sent();
@@ -171,7 +216,7 @@ var SuperTokensLock = /** @class */ (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 setTimeout(function () { return __awaiter(_this, void 0, void 0, function () {
-                    var STORAGE, lockObj;
+                    var STORAGE, lockObj, parsedLockObj;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0: return [4 /*yield*/, processLock_1.default().lock(iat)];
@@ -181,12 +226,12 @@ var SuperTokensLock = /** @class */ (function () {
                                     processLock_1.default().unlock(iat);
                                     return [2 /*return*/];
                                 }
-                                STORAGE = window.localStorage;
-                                lockObj = STORAGE.getItem(storageKey);
+                                STORAGE = this.storageHandler === undefined ? DEFAULT_STORAGE_HANDLER : this.storageHandler;
+                                lockObj = STORAGE.getItemSync(storageKey);
                                 if (lockObj !== null) {
-                                    lockObj = JSON.parse(lockObj);
-                                    lockObj.timeRefreshed = Date.now();
-                                    STORAGE.setItem(storageKey, JSON.stringify(lockObj));
+                                    parsedLockObj = JSON.parse(lockObj);
+                                    parsedLockObj.timeRefreshed = Date.now();
+                                    STORAGE.setItemSync(storageKey, JSON.stringify(parsedLockObj));
                                     processLock_1.default().unlock(iat);
                                 }
                                 else {
@@ -225,7 +270,7 @@ var SuperTokensLock = /** @class */ (function () {
                                         setTimeout(resolve, timeToWait);
                                     }
                                     else {
-                                        resolve();
+                                        resolve(null);
                                     }
                                 }
                             }
@@ -286,24 +331,24 @@ var SuperTokensLock = /** @class */ (function () {
      */
     SuperTokensLock.prototype.releaseLock__private__ = function (lockKey) {
         return __awaiter(this, void 0, void 0, function () {
-            var STORAGE, STORAGE_KEY, lockObj;
+            var STORAGE, STORAGE_KEY, lockObj, parsedlockObj;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        STORAGE = window.localStorage;
+                        STORAGE = this.storageHandler === undefined ? DEFAULT_STORAGE_HANDLER : this.storageHandler;
                         STORAGE_KEY = LOCK_STORAGE_KEY + "-" + lockKey;
-                        lockObj = STORAGE.getItem(STORAGE_KEY);
+                        lockObj = STORAGE.getItemSync(STORAGE_KEY);
                         if (lockObj === null) {
                             return [2 /*return*/];
                         }
-                        lockObj = JSON.parse(lockObj);
-                        if (!(lockObj.id === this.id)) return [3 /*break*/, 2];
-                        return [4 /*yield*/, processLock_1.default().lock(lockObj.iat)];
+                        parsedlockObj = JSON.parse(lockObj);
+                        if (!(parsedlockObj.id === this.id)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, processLock_1.default().lock(parsedlockObj.iat)];
                     case 1:
                         _a.sent();
-                        this.acquiredIatSet.delete(lockObj.iat);
-                        STORAGE.removeItem(STORAGE_KEY);
-                        processLock_1.default().unlock(lockObj.iat);
+                        this.acquiredIatSet.delete(parsedlockObj.iat);
+                        STORAGE.removeItemSync(STORAGE_KEY);
+                        processLock_1.default().unlock(parsedlockObj.iat);
                         SuperTokensLock.notifyWaiters();
                         _a.label = 2;
                     case 2: return [2 /*return*/];
@@ -317,20 +362,29 @@ var SuperTokensLock = /** @class */ (function () {
      * @description If a lock is acquired by a tab and the tab is closed before the lock is
      *              released, this function will release those locks
      */
-    SuperTokensLock.lockCorrector = function () {
+    SuperTokensLock.lockCorrector = function (storageHandler) {
         var MIN_ALLOWED_TIME = Date.now() - 5000;
-        var STORAGE = window.localStorage;
-        var KEYS = Object.keys(STORAGE);
+        var STORAGE = storageHandler;
+        var KEYS = [];
+        var currIndex = 0;
+        while (true) {
+            var key = STORAGE.keySync(currIndex);
+            if (key === null) {
+                break;
+            }
+            KEYS.push(key);
+            currIndex++;
+        }
         var notifyWaiters = false;
         for (var i = 0; i < KEYS.length; i++) {
             var LOCK_KEY = KEYS[i];
             if (LOCK_KEY.includes(LOCK_STORAGE_KEY)) {
-                var lockObj = STORAGE.getItem(LOCK_KEY);
+                var lockObj = STORAGE.getItemSync(LOCK_KEY);
                 if (lockObj !== null) {
-                    lockObj = JSON.parse(lockObj);
-                    if ((lockObj.timeRefreshed === undefined && lockObj.timeAcquired < MIN_ALLOWED_TIME) ||
-                        (lockObj.timeRefreshed !== undefined && lockObj.timeRefreshed < MIN_ALLOWED_TIME)) {
-                        STORAGE.removeItem(LOCK_KEY);
+                    var parsedlockObj = JSON.parse(lockObj);
+                    if ((parsedlockObj.timeRefreshed === undefined && parsedlockObj.timeAcquired < MIN_ALLOWED_TIME) ||
+                        (parsedlockObj.timeRefreshed !== undefined && parsedlockObj.timeRefreshed < MIN_ALLOWED_TIME)) {
+                        STORAGE.removeItemSync(LOCK_KEY);
                         notifyWaiters = true;
                     }
                 }

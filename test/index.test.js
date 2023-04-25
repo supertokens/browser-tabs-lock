@@ -4,8 +4,8 @@ const wait = async (timeout) => new Promise((resolve) => {
     setTimeout(resolve, timeout);
 });
 
-describe("Test simple locking", async function() {
-    it("Test that locking works when using more than 2 tabs", async function() {
+describe("Test simple locking", async function () {
+    it("Test that locking works when using more than 2 tabs", async function () {
         const domain = "file://" + process.cwd() + "/test/counterTest.html";
         const browser = await puppeteer.launch({
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -13,7 +13,7 @@ describe("Test simple locking", async function() {
         const page0 = await browser.newPage();
 
         // Reset localStorage for testing domain
-        await page0.goto(domain, {waitUntil: "load"});
+        await page0.goto(domain, { waitUntil: "load" });
         await page0.evaluate(() => {
             localStorage.setItem("tabs-global-counter", "0");
         });
@@ -24,7 +24,7 @@ describe("Test simple locking", async function() {
         for (let i = 0; i < tabCount; i++) {
             const page = await browser.newPage();
             await page.goto(domain, { waitUntil: "load" });
-            await page.addScriptTag({path: `./bundle/bundle.js`, type: "text/javascript"});
+            await page.addScriptTag({ path: `./bundle/bundle.js`, type: "text/javascript" });
             page.evaluate(() => {
                 doTask();
             });
@@ -33,7 +33,7 @@ describe("Test simple locking", async function() {
 
         await wait(20000);
 
-        for(let i = 0; i < pages.length; i++) {
+        for (let i = 0; i < pages.length; i++) {
             let page = pages[i];
             await page.evaluate(() => {
                 isStopped = true;
@@ -48,7 +48,7 @@ describe("Test simple locking", async function() {
 
         let haveAllStopped = false;
 
-        while(!haveAllStopped) {
+        while (!haveAllStopped) {
             let results = [];
 
             for (let i = 0; i < pages.length; i++) {
@@ -70,7 +70,7 @@ describe("Test simple locking", async function() {
 
         let tabCounterSum = 0;
 
-        for(let i = 0; i < pages.length; i++) {
+        for (let i = 0; i < pages.length; i++) {
             let page = pages[i];
 
             let currentTabCounter = await page.evaluate(() => {
@@ -88,15 +88,15 @@ describe("Test simple locking", async function() {
     });
 
 
-    it("Test that acquiring the same lock on multiple tabs succeeds after the first tab is closed", async function(){
+    it("Test that acquiring the same lock on multiple tabs succeeds after the first tab is closed", async function () {
         const domain = "file://" + process.cwd() + "/test/releaseOnClose.html";
         const browser = await puppeteer.launch({
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
         });
 
         const page1 = await browser.newPage();
-        await page1.goto(domain, {waitUntil: "load"});
-        await page1.addScriptTag({path: `./bundle/bundle.js`, type: "text/javascript"});
+        await page1.goto(domain, { waitUntil: "load" });
+        await page1.addScriptTag({ path: `./bundle/bundle.js`, type: "text/javascript" });
         await page1.evaluate(() => {
             doTask()
         })
@@ -108,8 +108,8 @@ describe("Test simple locking", async function() {
         });
 
         let page2 = await browser.newPage();
-        await page2.goto(domain, {waitUntil: "load"});
-        await page2.addScriptTag({path: `./bundle/bundle.js`, type: "text/javascript"});
+        await page2.goto(domain, { waitUntil: "load" });
+        await page2.addScriptTag({ path: `./bundle/bundle.js`, type: "text/javascript" });
         await page2.evaluate(() => {
             doTask()
         })
@@ -133,8 +133,8 @@ describe("Test simple locking", async function() {
         }
 
         page2 = await browser.newPage()
-        await page2.goto(domain, {waitUntil: "load"});
-        await page2.addScriptTag({path: `./bundle/bundle.js`, type: "text/javascript"});
+        await page2.goto(domain, { waitUntil: "load" });
+        await page2.addScriptTag({ path: `./bundle/bundle.js`, type: "text/javascript" });
         await page2.evaluate(() => {
             doTask()
         })
@@ -159,8 +159,8 @@ describe("Test simple locking", async function() {
         });
 
         const page = await browser.newPage();
-        await page.goto(domain, {waitUntil: "load"});
-        await page.addScriptTag({path: `./bundle/bundle.js`, type: "text/javascript"})
+        await page.goto(domain, { waitUntil: "load" });
+        await page.addScriptTag({ path: `./bundle/bundle.js`, type: "text/javascript" })
         await page.evaluate(() => {
             doTask();
         })
@@ -192,7 +192,7 @@ describe("Test simple locking", async function() {
         browser.close();
     });
 
-    it("Test that multiple lock instances in the same tab using the same key works as expected", async function() {
+    it("Test that multiple lock instances in the same tab using the same key works as expected", async function () {
         const domain = "file://" + process.cwd() + "/test/singleTabMultiLock.html";
         const browser = await puppeteer.launch({
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -201,15 +201,15 @@ describe("Test simple locking", async function() {
         const page0 = await browser.newPage();
 
         // Reset localStorage for testing domain
-        await page0.goto(domain, {waitUntil: "load"});
+        await page0.goto(domain, { waitUntil: "load" });
         await page0.evaluate(() => {
             localStorage.setItem("tabs-global-counter", "0");
         });
         page0.close();
 
         const page = await browser.newPage();
-        await page.goto(domain, {waitUntil: "load"});
-        await page.addScriptTag({path: `./bundle/bundle.js`, type: "text/javascript"});
+        await page.goto(domain, { waitUntil: "load" });
+        await page.addScriptTag({ path: `./bundle/bundle.js`, type: "text/javascript" });
         await page.evaluate(() => {
             start();
         });
@@ -222,7 +222,7 @@ describe("Test simple locking", async function() {
 
         let haveAllStopped = false;
 
-        while(!haveAllStopped) {
+        while (!haveAllStopped) {
             let stopValues = await page.evaluate(() => {
                 return didStopValues;
             });
@@ -242,7 +242,7 @@ describe("Test simple locking", async function() {
 
         let localCounterSum = 0;
 
-        for(let i = 0; i < localCounterValues.length; i++) {
+        for (let i = 0; i < localCounterValues.length; i++) {
             localCounterSum += localCounterValues[i];
         }
 
